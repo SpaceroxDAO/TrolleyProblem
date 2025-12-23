@@ -1,0 +1,98 @@
+<div id="game-container">
+  <div id="game-screen">
+
+    <!-- Title Screen -->
+    <div id="title-screen">
+      <div class="title-trolley">🚃</div>
+      <h1>THE TROLLEY PROBLEM</h1>
+      <p class="subtitle">A philosophical exploration of ethics, morality, and the weight of choice.</p>
+      <p class="info">You will face 5 moral dilemmas.<br>There are no right answers.</p>
+      <button class="start-btn" onclick="startGame()">
+        <span class="btn-text">START</span>
+        <span class="btn-icon">▶</span>
+      </button>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-play" class="hidden">
+      <div id="stats">
+        <span class="stat"><span class="label">SCENARIO</span> <span id="scenario-num">1</span>/5</span>
+        <span class="stat"><span class="label">SAVED</span> <span id="saved-count">0</span></span>
+      </div>
+
+      <div id="scenario-title">THE CLASSIC DILEMMA</div>
+
+      <div id="scene-container">
+        <canvas id="scene"></canvas>
+        <div id="animation-overlay" class="hidden">
+          <div id="impact-flash"></div>
+          <div id="outcome-text"></div>
+        </div>
+      </div>
+
+      <div id="dialogue-box">
+        <p id="dialogue-text">Loading scenario...</p>
+        <div class="dialogue-indicator"></div>
+      </div>
+
+      <div id="choices">
+        <button class="choice-btn" id="choice-a" onclick="makeChoice('A')">
+          <span class="choice-key">A</span>
+          <span class="choice-text">Do nothing</span>
+        </button>
+        <button class="choice-btn" id="choice-b" onclick="makeChoice('B')">
+          <span class="choice-key">B</span>
+          <span class="choice-text">Pull the lever</span>
+        </button>
+      </div>
+
+      <div id="timer-bar"></div>
+    </div>
+
+    <!-- Result Screen -->
+    <div id="result-screen" class="hidden">
+      <div id="result-icon"></div>
+      <h2 id="result-title">YOUR CHOICE</h2>
+      <p id="result-text"></p>
+      <div id="philosophy-box">
+        <div class="philosophy-header">📚 PHILOSOPHICAL INSIGHT</div>
+        <p id="philosophy-text"></p>
+      </div>
+      <div id="death-toll">
+        <span class="toll-saved">+<span id="toll-saved-num">0</span> saved</span>
+        <span class="toll-lost">-<span id="toll-lost-num">0</span> lost</span>
+      </div>
+      <button class="start-btn" onclick="nextScenario()">
+        <span class="btn-text">CONTINUE</span>
+        <span class="btn-icon">→</span>
+      </button>
+    </div>
+
+    <!-- Summary Screen -->
+    <div id="summary-screen" class="hidden">
+      <h2>JOURNEY COMPLETE</h2>
+      <div class="summary-stats">
+        <div class="stat-box">
+          <div class="stat-icon">💀</div>
+          <div class="stat-label">LIVES SAVED</div>
+          <div class="stat-value" id="final-saved">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-icon">⚡</div>
+          <div class="stat-label">ACTIVE CHOICES</div>
+          <div class="stat-value" id="active-choices">0</div>
+        </div>
+      </div>
+      <div class="philosophy-result-box">
+        <div class="philosophy-badge" id="philosophy-type">UTILITARIAN</div>
+        <p class="philosophy-result" id="philosophy-summary"></p>
+      </div>
+      <button class="start-btn" onclick="restartGame()">
+        <span class="btn-text">PLAY AGAIN</span>
+        <span class="btn-icon">↺</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="scanlines"></div>
+</div>
