@@ -1,0 +1,186 @@
+<div id="game-container">
+  <div id="game-screen">
+
+    <!-- Title Screen -->
+    <div id="title-screen">
+      <div class="title-trolley">🚃</div>
+      <h1>THE TROLLEY PROBLEM</h1>
+      <p class="subtitle">A Comprehensive Exploration of Moral Philosophy</p>
+      <p class="info">12 moral dilemmas testing your ethical consistency.<br>Your choices reveal your philosophical alignment.</p>
+      <div class="philosophy-preview">
+        <span>Utilitarianism</span>
+        <span>Deontology</span>
+        <span>Virtue Ethics</span>
+        <span>Care Ethics</span>
+      </div>
+      <button class="start-btn" onclick="startGame()">
+        <span class="btn-text">BEGIN EXAMINATION</span>
+        <span class="btn-icon">▶</span>
+      </button>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-play" class="hidden">
+      <div id="stats">
+        <span class="stat"><span class="label">DILEMMA</span> <span id="scenario-num">1</span>/12</span>
+        <span class="stat"><span class="label">CONSISTENCY</span> <span id="consistency-score">100</span>%</span>
+      </div>
+
+      <div id="scenario-category"></div>
+      <div id="scenario-title">THE CLASSIC DILEMMA</div>
+
+      <div id="scene-container">
+        <canvas id="scene"></canvas>
+        <div id="animation-overlay" class="hidden">
+          <div id="impact-flash"></div>
+          <div id="outcome-text"></div>
+        </div>
+      </div>
+
+      <div id="dialogue-box">
+        <p id="dialogue-text">Loading scenario...</p>
+        <div class="dialogue-indicator"></div>
+      </div>
+
+      <div id="choices">
+        <button class="choice-btn" id="choice-a" onclick="makeChoice('A')">
+          <span class="choice-key">A</span>
+          <span class="choice-text">Do nothing</span>
+        </button>
+        <button class="choice-btn" id="choice-b" onclick="makeChoice('B')">
+          <span class="choice-key">B</span>
+          <span class="choice-text">Pull the lever</span>
+        </button>
+      </div>
+
+      <div id="stakes-indicator">
+        <span class="stakes-label">MORAL STAKES:</span>
+        <div class="stakes-bar"><div class="stakes-fill"></div></div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div id="result-screen" class="hidden">
+      <div id="result-icon"></div>
+      <h2 id="result-title">YOUR CHOICE</h2>
+      <p id="result-text"></p>
+
+      <div id="philosophy-implications">
+        <div class="implication-header">PHILOSOPHICAL IMPLICATIONS</div>
+        <div id="implications-list"></div>
+      </div>
+
+      <div id="consistency-alert" class="hidden">
+        <span class="alert-icon">⚠️</span>
+        <span class="alert-text">This choice conflicts with your earlier decisions</span>
+      </div>
+
+      <button class="start-btn" onclick="nextScenario()">
+        <span class="btn-text">CONTINUE</span>
+        <span class="btn-icon">→</span>
+      </button>
+    </div>
+
+    <!-- Summary Screen -->
+    <div id="summary-screen" class="hidden">
+      <h2>PHILOSOPHICAL PROFILE</h2>
+
+      <div id="primary-philosophy">
+        <div class="primary-badge" id="primary-type">UTILITARIAN</div>
+        <p class="primary-desc" id="primary-description"></p>
+      </div>
+
+      <div id="philosophy-bars">
+        <div class="phil-bar-item">
+          <span class="phil-name">Utilitarianism</span>
+          <div class="phil-bar"><div class="phil-fill" id="bar-util"></div></div>
+          <span class="phil-percent" id="pct-util">0%</span>
+        </div>
+        <div class="phil-bar-item">
+          <span class="phil-name">Deontology</span>
+          <div class="phil-bar"><div class="phil-fill" id="bar-deont"></div></div>
+          <span class="phil-percent" id="pct-deont">0%</span>
+        </div>
+        <div class="phil-bar-item">
+          <span class="phil-name">Virtue Ethics</span>
+          <div class="phil-bar"><div class="phil-fill" id="bar-virtue"></div></div>
+          <span class="phil-percent" id="pct-virtue">0%</span>
+        </div>
+        <div class="phil-bar-item">
+          <span class="phil-name">Care Ethics</span>
+          <div class="phil-bar"><div class="phil-fill" id="bar-care"></div></div>
+          <span class="phil-percent" id="pct-care">0%</span>
+        </div>
+        <div class="phil-bar-item">
+          <span class="phil-name">Contractarianism</span>
+          <div class="phil-bar"><div class="phil-fill" id="bar-contract"></div></div>
+          <span class="phil-percent" id="pct-contract">0%</span>
+        </div>
+        <div class="phil-bar-item">
+          <span class="phil-name">Natural Rights</span>
+          <div class="phil-bar"><div class="phil-fill" id="bar-rights"></div></div>
+          <span class="phil-percent" id="pct-rights">0%</span>
+        </div>
+      </div>
+
+      <div id="trait-analysis">
+        <div class="trait-header">MORAL TENDENCIES</div>
+        <div class="trait-grid">
+          <div class="trait-item">
+            <span class="trait-label">Action Preference</span>
+            <div class="trait-spectrum">
+              <span>Passive</span>
+              <div class="trait-bar"><div class="trait-marker" id="marker-action"></div></div>
+              <span>Active</span>
+            </div>
+          </div>
+          <div class="trait-item">
+            <span class="trait-label">Moral Scope</span>
+            <div class="trait-spectrum">
+              <span>Partial</span>
+              <div class="trait-bar"><div class="trait-marker" id="marker-scope"></div></div>
+              <span>Impartial</span>
+            </div>
+          </div>
+          <div class="trait-item">
+            <span class="trait-label">Ethical Focus</span>
+            <div class="trait-spectrum">
+              <span>Rules</span>
+              <div class="trait-bar"><div class="trait-marker" id="marker-focus"></div></div>
+              <span>Outcomes</span>
+            </div>
+          </div>
+          <div class="trait-item">
+            <span class="trait-label">Harm Doctrine</span>
+            <div class="trait-spectrum">
+              <span>Absolute</span>
+              <div class="trait-bar"><div class="trait-marker" id="marker-harm"></div></div>
+              <span>Flexible</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="philosophers-match">
+        <div class="match-header">PHILOSOPHERS YOU ALIGN WITH</div>
+        <div id="philosopher-list"></div>
+      </div>
+
+      <div id="consistency-report">
+        <div class="consistency-header">CONSISTENCY SCORE</div>
+        <div class="consistency-display">
+          <span class="consistency-number" id="final-consistency">85</span>
+          <span class="consistency-label">%</span>
+        </div>
+        <p class="consistency-text" id="consistency-explanation"></p>
+      </div>
+
+      <button class="start-btn" onclick="restartGame()">
+        <span class="btn-text">EXAMINE AGAIN</span>
+        <span class="btn-icon">↺</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="scanlines"></div>
+</div>
