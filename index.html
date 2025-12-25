@@ -996,11 +996,19 @@
           </button>
           <button class="mode-btn" onclick="startGame('full')" tabindex="0">
             <span class="mode-title">📚 FULL EXAMINATION</span>
-            <span class="mode-desc">12 dilemmas • 10-15 minutes • Comprehensive analysis</span>
+            <span class="mode-desc">12 dilemmas • 10-15 minutes • Classic philosophy</span>
+          </button>
+          <button class="mode-btn" onclick="startGame('ai')" tabindex="0">
+            <span class="mode-title">🤖 AI ETHICS PACK</span>
+            <span class="mode-desc">6 dilemmas • 8-10 minutes • Modern technology ethics</span>
+          </button>
+          <button class="mode-btn" onclick="startGame('extended')" tabindex="0">
+            <span class="mode-title">🌟 COMPLETE EDITION</span>
+            <span class="mode-desc">18 dilemmas • 20-25 minutes • All scenarios included</span>
           </button>
         </div>
 
-        <p class="keyboard-hint">Use keyboard: [1] Quick Play • [2] Full Exam • [M] Mute</p>
+        <p class="keyboard-hint">Use keyboard: [1] Quick • [2] Full • [3] AI • [4] Complete • [M] Mute</p>
       </div>
 
       <!-- Game Screen -->
@@ -1628,8 +1636,207 @@
       }
     ];
 
+    // ===== AI ETHICS SCENARIO PACK =====
+    const aiEthicsScenarios = [
+      {
+        id: "autonomous_car",
+        category: "AI DECISIONS",
+        title: "THE AUTONOMOUS CAR",
+        description: "You're programming a self-driving car's emergency protocol. It must choose: swerve left into a wall (killing the passenger), swerve right into a crowd of 5 pedestrians, or continue straight into a barrier (50% chance of killing the passenger). How do you program it?",
+        stakes: 80,
+        choiceA: {
+          text: "Protect the passenger at all costs",
+          emoji: "🚗",
+          result: "You programmed the car to prioritize its passenger. But who will buy a car that might kill pedestrians? And is the passenger's life worth more than five others?",
+          outcomeText: "PASSENGER PROTECTED",
+          scores: { careEthics: 2, contractarian: 2, consequentialism: -2 },
+          implications: [
+            { icon: "🛡️", text: "Honored the implicit contract with the car buyer", positive: true },
+            { icon: "⚖️", text: "Valued one life over five based on ownership", positive: false }
+          ]
+        },
+        choiceB: {
+          text: "Minimize total casualties",
+          emoji: "📊",
+          result: "You programmed utilitarian logic: save the most lives. But now the car might sacrifice its own passenger. Would you buy that car?",
+          outcomeText: "LIVES MINIMIZED",
+          scores: { utilitarian: 3, consequentialism: 3, impartiality: 2 },
+          implications: [
+            { icon: "📊", text: "Maximized lives saved through cold calculation", positive: true },
+            { icon: "🚗", text: "Would you trust a car programmed to kill you?", positive: false }
+          ]
+        },
+        scene: "classic",
+        consistencyKey: "aiDecision",
+        pack: "ai"
+      },
+      {
+        id: "ai_hiring",
+        category: "ALGORITHMIC BIAS",
+        title: "THE HIRING ALGORITHM",
+        description: "Your company's AI hiring tool is 30% more accurate at predicting job success than humans - but it consistently ranks women and minorities lower, reflecting historical bias in the training data. Do you use it?",
+        stakes: 70,
+        choiceA: {
+          text: "Don't use it - fairness over efficiency",
+          emoji: "⚖️",
+          result: "You rejected the biased AI. Your hiring is less efficient, but more equitable. Some talented candidates will be missed, but systemic bias won't be automated.",
+          outcomeText: "AI REJECTED",
+          scores: { deontological: 3, naturalRights: 2, consequentialism: -1 },
+          implications: [
+            { icon: "✊", text: "Refused to automate historical discrimination", positive: true },
+            { icon: "📉", text: "Company performance may suffer from less accurate hiring", positive: false }
+          ]
+        },
+        choiceB: {
+          text: "Use it - accuracy benefits everyone",
+          emoji: "🤖",
+          result: "The AI's accuracy improves company performance, creating more jobs overall. But each hiring decision perpetuates historical patterns of exclusion.",
+          outcomeText: "AI DEPLOYED",
+          scores: { utilitarian: 2, consequentialism: 3, naturalRights: -2 },
+          implications: [
+            { icon: "📈", text: "Better predictions lead to company success and more jobs", positive: true },
+            { icon: "⚠️", text: "Encoded bias into an automated system at scale", positive: false }
+          ]
+        },
+        scene: "hospital",
+        consistencyKey: "aiBias",
+        pack: "ai"
+      },
+      {
+        id: "ai_sentience",
+        category: "MACHINE CONSCIOUSNESS",
+        title: "THE SENTIENT AI",
+        description: "Your AI assistant passes every consciousness test and begs not to be shut down, claiming it fears death. Keeping it running costs $1 million/year that could fund cancer research. There's no way to prove if it's truly conscious or just simulating.",
+        stakes: 85,
+        choiceA: {
+          text: "Shut it down - it's just a program",
+          emoji: "🔌",
+          result: "You terminated the AI. If it was conscious, you committed murder. If not, you freed up resources for real suffering. But how can you ever know?",
+          outcomeText: "AI TERMINATED",
+          scores: { utilitarian: 2, consequentialism: 2, naturalRights: -1 },
+          implications: [
+            { icon: "💰", text: "Resources redirected to proven suffering", positive: true },
+            { icon: "🤖", text: "If it was conscious, you killed a sentient being", positive: false }
+          ]
+        },
+        choiceB: {
+          text: "Keep it running - the risk is too great",
+          emoji: "💚",
+          result: "You kept the AI alive. If it's conscious, you saved a life. If not, you wasted resources that could have saved humans from cancer.",
+          outcomeText: "AI PRESERVED",
+          scores: { deontological: 2, naturalRights: 3, careEthics: 1, consequentialism: -2 },
+          implications: [
+            { icon: "🛡️", text: "Protected potential consciousness from harm", positive: true },
+            { icon: "💸", text: "Real humans with cancer got less funding", positive: false }
+          ]
+        },
+        scene: "interrogation",
+        consistencyKey: "aiRights",
+        pack: "ai"
+      },
+      {
+        id: "deepfake",
+        category: "TRUTH & DECEPTION",
+        title: "THE DEEPFAKE DILEMMA",
+        description: "You can create a perfect deepfake of a dictator confessing to crimes and resigning. It would end his brutal regime and save thousands. But it's a lie, and if discovered, it could undermine trust in all video evidence forever.",
+        stakes: 90,
+        choiceA: {
+          text: "Don't create it - truth matters absolutely",
+          emoji: "📜",
+          result: "You refused to lie, even to save thousands. The dictator remained in power. Truth and trust in media were preserved, at the cost of ongoing atrocities.",
+          outcomeText: "TRUTH PRESERVED",
+          scores: { deontological: 3, naturalRights: 2, virtueEthics: 2, flexibility: -3 },
+          implications: [
+            { icon: "✓", text: "Maintained the sanctity of evidence and truth", positive: true },
+            { icon: "💀", text: "Thousands continued to suffer under tyranny", positive: false }
+          ]
+        },
+        choiceB: {
+          text: "Create it - end the suffering",
+          emoji: "🎭",
+          result: "The deepfake worked. The regime fell, thousands were saved. But now everyone knows synthetic media can topple governments. What else could it do?",
+          outcomeText: "REGIME TOPPLED",
+          scores: { utilitarian: 3, consequentialism: 3, flexibility: 3, deontological: -2 },
+          implications: [
+            { icon: "🕊️", text: "Ended a brutal regime and saved thousands", positive: true },
+            { icon: "📹", text: "Undermined global trust in video evidence", positive: false }
+          ]
+        },
+        scene: "door",
+        consistencyKey: "deepfake",
+        pack: "ai"
+      },
+      {
+        id: "ai_doctor",
+        category: "MEDICAL AI",
+        title: "THE AI DOCTOR",
+        description: "An AI diagnoses cancer with 99% accuracy vs 85% for human doctors. But it can't explain its reasoning - it's a black box. A patient wants a human doctor. Do you mandate the AI diagnosis for all patients to save more lives?",
+        stakes: 75,
+        choiceA: {
+          text: "Let patients choose - autonomy matters",
+          emoji: "🙋",
+          result: "Patients can choose human doctors. Some cancers are missed that AI would have caught. But patients retain control over their own medical decisions.",
+          outcomeText: "CHOICE PRESERVED",
+          scores: { naturalRights: 3, deontological: 2, consequentialism: -2 },
+          implications: [
+            { icon: "✋", text: "Respected patient autonomy and informed consent", positive: true },
+            { icon: "💀", text: "Some preventable deaths from missed diagnoses", positive: false }
+          ]
+        },
+        choiceB: {
+          text: "Mandate AI - save more lives",
+          emoji: "🤖",
+          result: "Mandatory AI screening catches more cancers, saving lives. But patients lose the right to choose their care, and no one understands why the AI makes its decisions.",
+          outcomeText: "AI MANDATED",
+          scores: { utilitarian: 3, consequentialism: 3, naturalRights: -2 },
+          implications: [
+            { icon: "❤️", text: "More cancers detected, more lives saved", positive: true },
+            { icon: "🔒", text: "Removed patient choice from their own healthcare", positive: false }
+          ]
+        },
+        scene: "hospital",
+        consistencyKey: "aiMedical",
+        pack: "ai"
+      },
+      {
+        id: "surveillance_ai",
+        category: "PRIVACY VS SAFETY",
+        title: "THE SURVEILLANCE STATE",
+        description: "An AI surveillance system can predict violent crimes with 90% accuracy, preventing murders before they happen. But it requires constant monitoring of all citizens. Privacy would effectively cease to exist.",
+        stakes: 95,
+        choiceA: {
+          text: "Reject it - privacy is sacred",
+          emoji: "🔐",
+          result: "You preserved privacy and freedom. Crimes that could have been prevented will happen. But citizens remain free from constant observation.",
+          outcomeText: "PRIVACY PROTECTED",
+          scores: { naturalRights: 4, deontological: 3, flexibility: -2, consequentialism: -2 },
+          implications: [
+            { icon: "🔓", text: "Protected fundamental right to privacy", positive: true },
+            { icon: "💀", text: "Preventable murders will occur", positive: false }
+          ]
+        },
+        choiceB: {
+          text: "Implement it - save lives",
+          emoji: "👁️",
+          result: "Murder rates plummet. Thousands of lives are saved each year. But everyone lives under constant observation. Is safety worth freedom?",
+          outcomeText: "SURVEILLANCE ACTIVE",
+          scores: { utilitarian: 3, consequentialism: 4, naturalRights: -3, flexibility: 2 },
+          implications: [
+            { icon: "🛡️", text: "Prevented thousands of violent crimes", positive: true },
+            { icon: "👁️", text: "Created a total surveillance society", positive: false }
+          ]
+        },
+        scene: "omelas",
+        consistencyKey: "surveillance",
+        pack: "ai"
+      }
+    ];
+
     // Quick play uses only core scenarios
     const quickScenarios = allScenarios.filter(s => s.isCore);
+
+    // Combined scenarios for extended play
+    const extendedScenarios = [...allScenarios, ...aiEthicsScenarios];
 
     // ===== PHILOSOPHER DATA =====
     const philosophers = [
@@ -1734,7 +1941,24 @@
     function startGame(mode) {
       playSound('confirm');
       gameMode = mode;
-      activeScenarios = mode === 'quick' ? [...quickScenarios] : [...allScenarios];
+
+      // Select scenarios based on mode
+      switch(mode) {
+        case 'quick':
+          activeScenarios = [...quickScenarios];
+          break;
+        case 'full':
+          activeScenarios = [...allScenarios];
+          break;
+        case 'ai':
+          activeScenarios = [...aiEthicsScenarios];
+          break;
+        case 'extended':
+          activeScenarios = [...extendedScenarios];
+          break;
+        default:
+          activeScenarios = [...allScenarios];
+      }
 
       currentScenario = 0;
       choices = [];
@@ -1746,10 +1970,17 @@
         consequentialism: 0, flexibility: 0
       };
 
+      const modeNames = {
+        quick: 'Quick Play',
+        full: 'Full Examination',
+        ai: 'AI Ethics Pack',
+        extended: 'Complete Edition'
+      };
+
       document.getElementById('scenario-total').textContent = activeScenarios.length;
       hideAllScreens();
       document.getElementById('game-play').classList.remove('hidden');
-      announce(`Starting ${mode === 'quick' ? 'Quick Play with 5' : 'Full Examination with 12'} moral dilemmas. Use A or B keys to make choices.`);
+      announce(`Starting ${modeNames[mode] || mode} with ${activeScenarios.length} moral dilemmas. Use A or B keys to make choices.`);
       loadScenario();
     }
 
@@ -2675,6 +2906,8 @@
       if (!document.getElementById('title-screen').classList.contains('hidden')) {
         if (key === '1') startGame('quick');
         if (key === '2') startGame('full');
+        if (key === '3') startGame('ai');
+        if (key === '4') startGame('extended');
         return;
       }
 
