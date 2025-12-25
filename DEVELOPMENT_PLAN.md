@@ -1,5 +1,26 @@
 # TrolleyProblem Development Plan
 
+## ✅ Completed (December 2025)
+
+### Phase 1: Quick Wins - DONE
+- ✅ Sound mute toggle with localStorage persistence
+- ✅ Full keyboard navigation (A/B choices, Enter, M mute, 1/2 modes)
+- ✅ Game state persistence in localStorage
+- ✅ Results history tracking
+
+### Phase 2: Core Consolidation - DONE
+- ✅ Merged V1/V2 into unified `index.html`
+- ✅ Quick Play (5 scenarios) and Full Examination (12 scenarios) modes
+- ✅ Improved responsive design
+
+### Phase 3: Sharing & Results - DONE
+- ✅ Share modal with copy text, Twitter share, image download
+- ✅ Choice history showing how each decision affected scores
+- ✅ Real-time score impact display after each choice
+- ✅ Generated shareable results image
+
+---
+
 ## Project Overview
 
 This is a philosophical ethics exploration game that guides users through moral dilemmas inspired by the classic Trolley Problem. It's a front-end web application with a retro pixel-art aesthetic.
