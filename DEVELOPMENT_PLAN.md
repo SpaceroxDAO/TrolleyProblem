@@ -19,6 +19,20 @@
 - ✅ Real-time score impact display after each choice
 - ✅ Generated shareable results image
 
+### Phase 4: Accessibility - DONE
+- ✅ ARIA labels on all interactive elements
+- ✅ Screen reader live announcements
+- ✅ Enhanced focus indicators
+- ✅ Reduced motion support (@media prefers-reduced-motion)
+- ✅ High contrast mode support
+- ✅ Skip to content link
+
+### Phase 5: Scenario Packs - DONE
+- ✅ AI Ethics Pack (6 new scenarios)
+- ✅ 4 game modes: Quick, Full, AI Ethics, Complete Edition
+- ✅ Extended keyboard shortcuts (1-4)
+- ✅ 18 total scenarios available
+
 ---
 
 ## Project Overview
