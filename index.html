@@ -1,879 +1,2956 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>The Trolley Problem - A Philosophical Game</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="description" content="An interactive philosophical ethics game exploring moral dilemmas through the classic Trolley Problem. Test your ethical consistency and discover your philosophical alignment.">
+  <title>The Trolley Problem - A Philosophical Game</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-        body {
-            background: #1a1a2e;
-            font-family: 'Press Start 2P', cursive;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
+    body {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      font-family: 'Press Start 2P', cursive;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+      padding: 10px;
+    }
 
-        #game-container {
-            width: 100%;
-            max-width: 400px;
-            padding: 10px;
-        }
+    #game-container {
+      width: 100%;
+      max-width: 480px;
+      position: relative;
+    }
 
-        #game-screen {
-            background: #16213e;
-            border: 4px solid #e94560;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 0 20px rgba(233, 69, 96, 0.3);
-            image-rendering: pixelated;
-        }
+    #game-screen {
+      background: linear-gradient(180deg, #16213e 0%, #1a1a2e 100%);
+      border: 4px solid #e94560;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 0 30px rgba(233, 69, 96, 0.4), inset 0 0 60px rgba(0,0,0,0.3);
+      position: relative;
+    }
 
-        #scene-container {
-            position: relative;
-            width: 100%;
-            height: 200px;
-            background: #0f3460;
-            border: 3px solid #533483;
-            margin-bottom: 15px;
-            overflow: hidden;
-        }
+    /* Settings Bar */
+    #settings-bar {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      gap: 8px;
+      z-index: 100;
+    }
 
-        #scene {
-            width: 100%;
-            height: 100%;
-        }
+    .settings-btn {
+      background: rgba(83, 52, 131, 0.8);
+      border: 2px solid #e94560;
+      color: #fff;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
 
-        #dialogue-box {
-            background: #0f0f23;
-            border: 3px solid #e94560;
-            padding: 12px;
-            margin-bottom: 15px;
-            min-height: 100px;
-        }
+    .settings-btn:hover { background: #e94560; transform: scale(1.1); }
+    .settings-btn.muted { opacity: 0.5; }
 
-        #dialogue-text {
-            color: #eee;
-            font-size: 8px;
-            line-height: 1.8;
-            text-shadow: 1px 1px 0 #000;
-        }
+    .hidden { display: none !important; }
 
-        #choices {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+    /* Title Screen */
+    #title-screen { text-align: center; padding: 20px 0; }
 
-        .choice-btn {
-            background: #533483;
-            border: 3px solid #e94560;
-            color: #fff;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 8px;
-            padding: 12px;
-            cursor: pointer;
-            transition: all 0.1s;
-            text-align: left;
-            line-height: 1.6;
-        }
+    .title-trolley {
+      font-size: 48px;
+      margin-bottom: 15px;
+      animation: bounce 1s ease infinite;
+    }
 
-        .choice-btn:hover, .choice-btn:active {
-            background: #e94560;
-            transform: scale(1.02);
-        }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
 
-        .choice-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+    #title-screen h1 {
+      color: #e94560;
+      font-size: 16px;
+      margin-bottom: 12px;
+      text-shadow: 2px 2px 0 #533483;
+    }
 
-        #stats {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 7px;
-            color: #e94560;
-        }
+    .subtitle {
+      color: #8be9fd;
+      font-size: 7px;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
 
-        #title-screen {
-            text-align: center;
-            padding: 20px;
-        }
+    .info {
+      color: #aaa;
+      font-size: 6px;
+      margin-bottom: 20px;
+      line-height: 1.8;
+    }
 
-        #title-screen h1 {
-            color: #e94560;
-            font-size: 14px;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 0 #533483;
-            line-height: 1.5;
-        }
+    /* Mode Selection */
+    .mode-selection {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
 
-        #title-screen p {
-            color: #aaa;
-            font-size: 7px;
-            margin-bottom: 30px;
-            line-height: 1.8;
-        }
+    .mode-btn {
+      background: linear-gradient(180deg, #533483 0%, #3d2660 100%);
+      border: 3px solid #e94560;
+      border-radius: 8px;
+      color: #fff;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 8px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+    }
 
-        .start-btn {
-            background: #e94560;
-            border: none;
-            color: #fff;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 10px;
-            padding: 15px 30px;
-            cursor: pointer;
-            animation: pulse 1s infinite;
-        }
+    .mode-btn:hover, .mode-btn:focus {
+      background: linear-gradient(180deg, #e94560 0%, #b33654 100%);
+      transform: scale(1.02);
+      outline: none;
+    }
 
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
+    .mode-btn .mode-title {
+      display: block;
+      font-size: 10px;
+      margin-bottom: 6px;
+      color: #8be9fd;
+    }
 
-        .hidden {
-            display: none !important;
-        }
+    .mode-btn .mode-desc {
+      font-size: 6px;
+      color: #ccc;
+      line-height: 1.6;
+    }
 
-        #result-screen {
-            text-align: center;
-            padding: 20px;
-        }
+    .philosophy-preview {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
 
-        #result-screen h2 {
-            color: #e94560;
-            font-size: 12px;
-            margin-bottom: 15px;
-        }
+    .philosophy-preview span {
+      background: rgba(83, 52, 131, 0.6);
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 5px;
+      color: #8be9fd;
+      border: 1px solid #533483;
+    }
 
-        #result-text {
-            color: #eee;
-            font-size: 7px;
-            line-height: 2;
-            margin-bottom: 20px;
-        }
+    /* Game Play Screen */
+    #stats {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #533483;
+    }
 
-        #philosophy-box {
-            background: #0f0f23;
-            border: 2px solid #533483;
-            padding: 12px;
-            margin-bottom: 15px;
-        }
+    .stat {
+      font-size: 7px;
+      color: #8be9fd;
+    }
 
-        #philosophy-text {
-            color: #8be9fd;
-            font-size: 7px;
-            line-height: 1.8;
-            text-align: left;
-        }
+    .stat .label { color: #888; font-size: 5px; display: block; margin-bottom: 3px; }
 
-        .trolley {
-            position: absolute;
-            font-size: 24px;
-            filter: drop-shadow(2px 2px 0 #000);
-        }
+    #scenario-category {
+      font-size: 6px;
+      color: #e94560;
+      text-align: center;
+      margin-bottom: 5px;
+      letter-spacing: 2px;
+    }
 
-        .person {
-            position: absolute;
-            font-size: 16px;
-            filter: drop-shadow(1px 1px 0 #000);
-        }
+    #scenario-title {
+      font-size: 11px;
+      color: #fff;
+      text-align: center;
+      margin-bottom: 12px;
+      text-shadow: 2px 2px 0 #533483;
+    }
 
-        .track {
-            position: absolute;
-            background: #4a4a4a;
-            height: 4px;
-        }
+    #scene-container {
+      position: relative;
+      width: 100%;
+      height: 180px;
+      background: #0f3460;
+      border: 3px solid #533483;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
 
-        .lever {
-            position: absolute;
-            font-size: 20px;
-            cursor: pointer;
-        }
+    #scene-container.shake {
+      animation: shake 0.3s ease;
+    }
 
-        #scenario-title {
-            color: #ff79c6;
-            font-size: 9px;
-            text-align: center;
-            margin-bottom: 10px;
-            text-shadow: 1px 1px 0 #000;
-        }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
 
-        /* Pixel art characters using CSS */
-        .pixel-person {
-            width: 12px;
-            height: 20px;
-            position: absolute;
-            image-rendering: pixelated;
-        }
+    #scene { width: 100%; height: 100%; }
 
-        .pixel-trolley {
-            width: 40px;
-            height: 25px;
-            position: absolute;
-            background: #e94560;
-            border: 2px solid #ff6b6b;
-            border-radius: 3px;
-        }
+    #animation-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
 
-        #summary-screen {
-            text-align: center;
-            padding: 15px;
-        }
+    #impact-flash {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #fff;
+      opacity: 0;
+      transition: opacity 0.1s;
+    }
 
-        #summary-screen h2 {
-            color: #e94560;
-            font-size: 11px;
-            margin-bottom: 15px;
-        }
+    #impact-flash.flash { opacity: 0.8; }
 
-        .stat-box {
-            background: #0f0f23;
-            border: 2px solid #533483;
-            padding: 10px;
-            margin-bottom: 10px;
-            text-align: left;
-        }
+    #outcome-text {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(233, 69, 96, 0.9);
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-size: 8px;
+      color: #fff;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
 
-        .stat-label {
-            color: #8be9fd;
-            font-size: 7px;
-            margin-bottom: 5px;
-        }
+    #outcome-text.show { opacity: 1; }
 
-        .stat-value {
-            color: #fff;
-            font-size: 8px;
-        }
+    #dialogue-box {
+      background: linear-gradient(180deg, #0f0f23 0%, #1a1a2e 100%);
+      border: 3px solid #e94560;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 12px;
+      min-height: 80px;
+    }
 
-        .philosophy-result {
-            color: #ff79c6;
-            font-size: 8px;
-            line-height: 1.8;
-            margin: 15px 0;
-        }
-    </style>
+    #dialogue-text {
+      color: #eee;
+      font-size: 7px;
+      line-height: 1.9;
+      text-shadow: 1px 1px 0 #000;
+    }
+
+    .dialogue-indicator {
+      width: 8px;
+      height: 8px;
+      background: #e94560;
+      margin-top: 8px;
+      animation: blink 0.8s infinite;
+    }
+
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    #choices {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .choice-btn {
+      background: linear-gradient(180deg, #533483 0%, #3d2660 100%);
+      border: 3px solid #e94560;
+      border-radius: 6px;
+      color: #fff;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 7px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: left;
+      line-height: 1.7;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .choice-btn:hover, .choice-btn:focus {
+      background: linear-gradient(180deg, #e94560 0%, #b33654 100%);
+      transform: scale(1.02);
+      outline: none;
+    }
+
+    .choice-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .choice-btn.selected { background: #27ae60; border-color: #2ecc71; }
+    .choice-btn.not-selected { opacity: 0.3; }
+
+    .choice-key {
+      background: #e94560;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 8px;
+      min-width: 24px;
+      text-align: center;
+    }
+
+    #stakes-indicator {
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .stakes-label { font-size: 5px; color: #888; }
+
+    .stakes-bar {
+      flex: 1;
+      height: 6px;
+      background: #1a1a2e;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .stakes-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #27ae60, #e94560, #9b59b6);
+      transition: width 0.5s;
+    }
+
+    /* Result Screen */
+    #result-screen { text-align: center; padding: 15px 0; }
+
+    #result-icon { font-size: 40px; margin-bottom: 12px; }
+
+    #result-title {
+      font-size: 12px;
+      color: #e94560;
+      margin-bottom: 12px;
+    }
+
+    #result-text {
+      font-size: 7px;
+      color: #ccc;
+      line-height: 1.8;
+      margin-bottom: 15px;
+    }
+
+    #philosophy-implications {
+      background: rgba(15, 52, 96, 0.5);
+      border: 2px solid #533483;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 15px;
+      text-align: left;
+    }
+
+    .implication-header {
+      font-size: 6px;
+      color: #8be9fd;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .implication-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 6px;
+      line-height: 1.6;
+    }
+
+    .implication-icon { font-size: 12px; }
+    .implication-positive { color: #2ecc71; }
+    .implication-negative { color: #e74c3c; }
+
+    #consistency-alert {
+      background: rgba(231, 76, 60, 0.2);
+      border: 2px solid #e74c3c;
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 15px;
+      font-size: 6px;
+      color: #e74c3c;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    /* Summary Screen */
+    #summary-screen { padding: 10px 0; }
+
+    #summary-screen h2 {
+      font-size: 12px;
+      color: #e94560;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    #primary-philosophy {
+      background: linear-gradient(180deg, #533483 0%, #3d2660 100%);
+      border: 3px solid #e94560;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .primary-badge {
+      display: inline-block;
+      background: #e94560;
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-size: 10px;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+
+    .primary-desc {
+      font-size: 6px;
+      color: #ccc;
+      line-height: 1.8;
+    }
+
+    #philosophy-bars {
+      background: rgba(15, 52, 96, 0.3);
+      border: 2px solid #533483;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 15px;
+    }
+
+    .phil-bar-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .phil-name {
+      font-size: 5px;
+      color: #8be9fd;
+      width: 80px;
+      text-align: right;
+    }
+
+    .phil-bar {
+      flex: 1;
+      height: 8px;
+      background: #1a1a2e;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .phil-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #e94560, #8be9fd);
+      transition: width 0.8s ease;
+      width: 0;
+    }
+
+    .phil-percent {
+      font-size: 6px;
+      color: #fff;
+      width: 35px;
+    }
+
+    #trait-analysis {
+      background: rgba(15, 52, 96, 0.3);
+      border: 2px solid #533483;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 15px;
+    }
+
+    .trait-header {
+      font-size: 6px;
+      color: #8be9fd;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .trait-grid { display: flex; flex-direction: column; gap: 10px; }
+
+    .trait-item { display: flex; flex-direction: column; gap: 4px; }
+
+    .trait-label {
+      font-size: 5px;
+      color: #888;
+      text-align: center;
+    }
+
+    .trait-spectrum {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 5px;
+      color: #aaa;
+    }
+
+    .trait-spectrum span { width: 50px; }
+    .trait-spectrum span:last-child { text-align: right; }
+
+    .trait-bar {
+      flex: 1;
+      height: 8px;
+      background: linear-gradient(90deg, #e94560, #533483, #8be9fd);
+      border-radius: 4px;
+      position: relative;
+    }
+
+    .trait-marker {
+      position: absolute;
+      top: -2px;
+      width: 12px;
+      height: 12px;
+      background: #fff;
+      border: 2px solid #e94560;
+      border-radius: 50%;
+      transform: translateX(-50%);
+      left: 50%;
+      transition: left 0.8s ease;
+    }
+
+    #philosophers-match {
+      background: rgba(15, 52, 96, 0.3);
+      border: 2px solid #533483;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 15px;
+    }
+
+    .match-header {
+      font-size: 6px;
+      color: #8be9fd;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    #philosopher-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .philosopher-tag {
+      background: #e94560;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 6px;
+      color: #fff;
+      cursor: help;
+    }
+
+    /* Choice History */
+    #choice-history {
+      background: rgba(15, 52, 96, 0.3);
+      border: 2px solid #533483;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 15px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .history-header {
+      font-size: 6px;
+      color: #8be9fd;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .history-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 8px;
+      margin-bottom: 6px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 4px;
+      border-left: 3px solid #533483;
+    }
+
+    .history-num {
+      background: #e94560;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 6px;
+      color: #fff;
+    }
+
+    .history-content { flex: 1; }
+
+    .history-title {
+      font-size: 6px;
+      color: #8be9fd;
+      margin-bottom: 4px;
+    }
+
+    .history-choice {
+      font-size: 5px;
+      color: #ccc;
+      line-height: 1.5;
+    }
+
+    .history-scores {
+      font-size: 5px;
+      color: #888;
+      margin-top: 4px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .score-tag {
+      background: rgba(139, 233, 253, 0.2);
+      padding: 2px 5px;
+      border-radius: 3px;
+    }
+
+    .score-tag.positive { color: #2ecc71; }
+    .score-tag.negative { color: #e74c3c; }
+
+    #consistency-report {
+      background: rgba(15, 52, 96, 0.3);
+      border: 2px solid #533483;
+      border-radius: 6px;
+      padding: 15px;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .consistency-header {
+      font-size: 6px;
+      color: #8be9fd;
+      margin-bottom: 10px;
+    }
+
+    .consistency-display {
+      margin-bottom: 10px;
+    }
+
+    .consistency-number {
+      font-size: 28px;
+      color: #2ecc71;
+    }
+
+    .consistency-label {
+      font-size: 14px;
+      color: #2ecc71;
+    }
+
+    .consistency-text {
+      font-size: 6px;
+      color: #aaa;
+      line-height: 1.8;
+    }
+
+    /* Buttons */
+    .start-btn {
+      background: linear-gradient(180deg, #e94560 0%, #b33654 100%);
+      border: 3px solid #ff6b8a;
+      border-radius: 8px;
+      color: #fff;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 10px;
+      padding: 15px 25px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .start-btn:hover, .start-btn:focus {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(233, 69, 96, 0.6);
+      outline: none;
+    }
+
+    .btn-icon { font-size: 14px; }
+
+    /* CRT Scanlines Effect */
+    #scanlines {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.1) 0px,
+        rgba(0, 0, 0, 0.1) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      z-index: 1000;
+    }
+
+    /* Keyboard hints */
+    .keyboard-hint {
+      font-size: 5px;
+      color: #666;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #1a1a2e; }
+    ::-webkit-scrollbar-thumb { background: #533483; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #e94560; }
+
+    /* Action buttons */
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .share-btn {
+      background: linear-gradient(180deg, #533483 0%, #3d2660 100%);
+      border-color: #8be9fd;
+    }
+
+    .share-btn:hover {
+      background: linear-gradient(180deg, #8be9fd 0%, #5bb3cd 100%);
+    }
+
+    /* Share Modal */
+    #share-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+
+    .modal-content {
+      background: linear-gradient(180deg, #16213e 0%, #1a1a2e 100%);
+      border: 4px solid #e94560;
+      border-radius: 12px;
+      padding: 25px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .modal-content h3 {
+      color: #e94560;
+      font-size: 12px;
+      margin-bottom: 20px;
+    }
+
+    .share-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .share-option {
+      background: linear-gradient(180deg, #533483 0%, #3d2660 100%);
+      border: 2px solid #8be9fd;
+      border-radius: 6px;
+      color: #fff;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 8px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .share-option:hover {
+      background: linear-gradient(180deg, #8be9fd 0%, #5bb3cd 100%);
+      color: #1a1a2e;
+    }
+
+    .close-modal {
+      background: transparent;
+      border: 2px solid #e94560;
+      border-radius: 6px;
+      color: #e94560;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 8px;
+      padding: 10px 20px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .close-modal:hover {
+      background: #e94560;
+      color: #fff;
+    }
+
+    #share-preview {
+      background: #0f0f23;
+      border: 2px solid #533483;
+      border-radius: 6px;
+      padding: 15px;
+      margin: 15px 0;
+      font-size: 6px;
+      color: #ccc;
+      text-align: left;
+      line-height: 1.8;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .copy-success {
+      color: #2ecc71 !important;
+      animation: pulse 0.5s ease;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    /* ===== ACCESSIBILITY ===== */
+
+    /* Skip to content link */
+    .skip-link {
+      position: absolute;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #e94560;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 0 0 8px 8px;
+      font-size: 10px;
+      z-index: 9999;
+      transition: top 0.3s;
+    }
+
+    .skip-link:focus {
+      top: 0;
+      outline: 3px solid #8be9fd;
+      outline-offset: 2px;
+    }
+
+    /* Enhanced focus indicators */
+    *:focus {
+      outline: 3px solid #8be9fd;
+      outline-offset: 2px;
+    }
+
+    *:focus:not(:focus-visible) {
+      outline: none;
+    }
+
+    *:focus-visible {
+      outline: 3px solid #8be9fd;
+      outline-offset: 2px;
+    }
+
+    .choice-btn:focus-visible,
+    .mode-btn:focus-visible,
+    .start-btn:focus-visible,
+    .share-option:focus-visible {
+      outline: 3px solid #fff;
+      outline-offset: 3px;
+      box-shadow: 0 0 0 6px rgba(139, 233, 253, 0.5);
+    }
+
+    /* Screen reader only content */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+
+      .title-trolley {
+        animation: none;
+      }
+
+      .dialogue-indicator {
+        animation: none;
+        opacity: 1;
+      }
+
+      #scene-container.shake {
+        animation: none;
+      }
+
+      #impact-flash.flash {
+        opacity: 0 !important;
+      }
+    }
+
+    /* High contrast mode support */
+    @media (prefers-contrast: high) {
+      .choice-btn,
+      .mode-btn,
+      .start-btn {
+        border-width: 4px;
+      }
+
+      #dialogue-box {
+        border-width: 4px;
+      }
+
+      .phil-bar,
+      .trait-bar,
+      .stakes-bar {
+        border: 2px solid #fff;
+      }
+    }
+
+    /* Live region for announcements */
+    #live-announcer {
+      position: absolute;
+      left: -10000px;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+  </style>
 </head>
 <body>
-    <div id="game-container">
-        <div id="game-screen">
-            <!-- Title Screen -->
-            <div id="title-screen">
-                <h1>🚃 THE TROLLEY PROBLEM 🚃</h1>
-                <p>A philosophical exploration of ethics, morality, and the weight of choice.</p>
-                <p>You will face 5 moral dilemmas. There are no right answers.</p>
-                <button class="start-btn" onclick="startGame()">START</button>
-            </div>
+  <!-- Skip to main content link for keyboard users -->
+  <a href="#main-content" class="skip-link">Skip to game content</a>
 
-            <!-- Game Screen -->
-            <div id="game-play" class="hidden">
-                <div id="stats">
-                    <span>SCENARIO: <span id="scenario-num">1</span>/5</span>
-                    <span>SAVED: <span id="saved-count">0</span></span>
-                </div>
+  <!-- Live region for screen reader announcements -->
+  <div id="live-announcer" aria-live="polite" aria-atomic="true"></div>
 
-                <div id="scenario-title">THE CLASSIC DILEMMA</div>
+  <div id="game-container" role="application" aria-label="The Trolley Problem Game">
+    <div id="game-screen">
+      <!-- Settings Bar -->
+      <div id="settings-bar" role="toolbar" aria-label="Game settings">
+        <button class="settings-btn" id="mute-btn" title="Toggle Sound (M)" onclick="toggleMute()" aria-label="Toggle sound. Currently unmuted. Press M key." aria-pressed="false">🔊</button>
+      </div>
 
-                <div id="scene-container">
-                    <canvas id="scene"></canvas>
-                </div>
+      <!-- Title Screen -->
+      <div id="title-screen" role="region" aria-label="Game start screen">
+        <div class="title-trolley">🚃</div>
+        <h1>THE TROLLEY PROBLEM</h1>
+        <p class="subtitle">A Philosophical Exploration of Moral Philosophy</p>
+        <p class="info">Test your ethical consistency through moral dilemmas.<br>Your choices reveal your philosophical alignment.</p>
 
-                <div id="dialogue-box">
-                    <p id="dialogue-text">Loading scenario...</p>
-                </div>
-
-                <div id="choices">
-                    <button class="choice-btn" id="choice-a" onclick="makeChoice('A')">Do nothing</button>
-                    <button class="choice-btn" id="choice-b" onclick="makeChoice('B')">Pull the lever</button>
-                </div>
-            </div>
-
-            <!-- Result Screen -->
-            <div id="result-screen" class="hidden">
-                <h2 id="result-title">YOUR CHOICE</h2>
-                <p id="result-text"></p>
-                <div id="philosophy-box">
-                    <p id="philosophy-text"></p>
-                </div>
-                <button class="start-btn" onclick="nextScenario()">CONTINUE</button>
-            </div>
-
-            <!-- Summary Screen -->
-            <div id="summary-screen" class="hidden">
-                <h2>JOURNEY COMPLETE</h2>
-                <div class="stat-box">
-                    <div class="stat-label">LIVES SAVED</div>
-                    <div class="stat-value" id="final-saved">0</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-label">ACTIVE CHOICES</div>
-                    <div class="stat-value" id="active-choices">0</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-label">YOUR PHILOSOPHY</div>
-                    <div class="stat-value" id="philosophy-type">Undetermined</div>
-                </div>
-                <p class="philosophy-result" id="philosophy-summary"></p>
-                <button class="start-btn" onclick="restartGame()">PLAY AGAIN</button>
-            </div>
+        <div class="philosophy-preview">
+          <span>Utilitarianism</span>
+          <span>Deontology</span>
+          <span>Virtue Ethics</span>
+          <span>Care Ethics</span>
+          <span>Contractarianism</span>
+          <span>Natural Rights</span>
         </div>
+
+        <div class="mode-selection">
+          <button class="mode-btn" onclick="startGame('quick')" tabindex="0">
+            <span class="mode-title">⚡ QUICK PLAY</span>
+            <span class="mode-desc">5 core dilemmas • 3-5 minutes • Essential scenarios</span>
+          </button>
+          <button class="mode-btn" onclick="startGame('full')" tabindex="0">
+            <span class="mode-title">📚 FULL EXAMINATION</span>
+            <span class="mode-desc">12 dilemmas • 10-15 minutes • Classic philosophy</span>
+          </button>
+          <button class="mode-btn" onclick="startGame('ai')" tabindex="0">
+            <span class="mode-title">🤖 AI ETHICS PACK</span>
+            <span class="mode-desc">6 dilemmas • 8-10 minutes • Modern technology ethics</span>
+          </button>
+          <button class="mode-btn" onclick="startGame('extended')" tabindex="0">
+            <span class="mode-title">🌟 COMPLETE EDITION</span>
+            <span class="mode-desc">18 dilemmas • 20-25 minutes • All scenarios included</span>
+          </button>
+        </div>
+
+        <p class="keyboard-hint">Use keyboard: [1] Quick • [2] Full • [3] AI • [4] Complete • [M] Mute</p>
+      </div>
+
+      <!-- Game Screen -->
+      <div id="game-play" class="hidden" role="region" aria-label="Game play area" id="main-content">
+        <div id="stats" role="status" aria-label="Game progress">
+          <span class="stat"><span class="label">DILEMMA</span> <span id="scenario-num">1</span>/<span id="scenario-total">12</span></span>
+          <span class="stat"><span class="label">CONSISTENCY</span> <span id="consistency-score">100</span>%</span>
+        </div>
+
+        <div id="scenario-category" aria-hidden="true"></div>
+        <h2 id="scenario-title">THE CLASSIC DILEMMA</h2>
+
+        <div id="scene-container" role="img" aria-label="Animated scene depicting the moral dilemma">
+          <canvas id="scene" aria-hidden="true"></canvas>
+          <div id="animation-overlay" class="hidden">
+            <div id="impact-flash"></div>
+            <div id="outcome-text"></div>
+          </div>
+        </div>
+
+        <div id="dialogue-box" role="region" aria-label="Scenario description">
+          <p id="dialogue-text" aria-live="polite">Loading scenario...</p>
+          <div class="dialogue-indicator" aria-hidden="true"></div>
+        </div>
+
+        <div id="choices" role="group" aria-label="Choose your action">
+          <button class="choice-btn" id="choice-a" onclick="makeChoice('A')" aria-describedby="dialogue-text">
+            <span class="choice-key" aria-hidden="true">A</span>
+            <span class="choice-text">Do nothing</span>
+            <span class="sr-only">Press A key to select</span>
+          </button>
+          <button class="choice-btn" id="choice-b" onclick="makeChoice('B')" aria-describedby="dialogue-text">
+            <span class="choice-key" aria-hidden="true">B</span>
+            <span class="choice-text">Pull the lever</span>
+            <span class="sr-only">Press B key to select</span>
+          </button>
+        </div>
+
+        <div id="stakes-indicator">
+          <span class="stakes-label">MORAL STAKES:</span>
+          <div class="stakes-bar"><div class="stakes-fill"></div></div>
+        </div>
+
+        <p class="keyboard-hint">Press [A] or [B] to choose • [M] to toggle sound</p>
+      </div>
+
+      <!-- Result Screen -->
+      <div id="result-screen" class="hidden" role="region" aria-label="Choice result">
+        <div id="result-icon" aria-hidden="true"></div>
+        <h2 id="result-title">YOUR CHOICE</h2>
+        <p id="result-text" aria-live="polite"></p>
+
+        <div id="philosophy-implications">
+          <div class="implication-header">PHILOSOPHICAL IMPLICATIONS</div>
+          <div id="implications-list"></div>
+        </div>
+
+        <div id="score-impact">
+          <div class="implication-header">SCORE IMPACT</div>
+          <div id="score-changes"></div>
+        </div>
+
+        <div id="consistency-alert" class="hidden">
+          <span class="alert-icon">⚠️</span>
+          <span class="alert-text">This choice conflicts with your earlier decisions</span>
+        </div>
+
+        <button class="start-btn" onclick="nextScenario()">
+          <span class="btn-text">CONTINUE</span>
+          <span class="btn-icon">→</span>
+        </button>
+        <p class="keyboard-hint">Press [Enter] or [Space] to continue</p>
+      </div>
+
+      <!-- Summary Screen -->
+      <div id="summary-screen" class="hidden" role="region" aria-label="Your philosophical profile results">
+        <h2>PHILOSOPHICAL PROFILE</h2>
+
+        <div id="primary-philosophy">
+          <div class="primary-badge" id="primary-type">UTILITARIAN</div>
+          <p class="primary-desc" id="primary-description"></p>
+        </div>
+
+        <div id="philosophy-bars">
+          <div class="phil-bar-item">
+            <span class="phil-name">Utilitarianism</span>
+            <div class="phil-bar"><div class="phil-fill" id="bar-util"></div></div>
+            <span class="phil-percent" id="pct-util">0%</span>
+          </div>
+          <div class="phil-bar-item">
+            <span class="phil-name">Deontology</span>
+            <div class="phil-bar"><div class="phil-fill" id="bar-deont"></div></div>
+            <span class="phil-percent" id="pct-deont">0%</span>
+          </div>
+          <div class="phil-bar-item">
+            <span class="phil-name">Virtue Ethics</span>
+            <div class="phil-bar"><div class="phil-fill" id="bar-virtue"></div></div>
+            <span class="phil-percent" id="pct-virtue">0%</span>
+          </div>
+          <div class="phil-bar-item">
+            <span class="phil-name">Care Ethics</span>
+            <div class="phil-bar"><div class="phil-fill" id="bar-care"></div></div>
+            <span class="phil-percent" id="pct-care">0%</span>
+          </div>
+          <div class="phil-bar-item">
+            <span class="phil-name">Contractarianism</span>
+            <div class="phil-bar"><div class="phil-fill" id="bar-contract"></div></div>
+            <span class="phil-percent" id="pct-contract">0%</span>
+          </div>
+          <div class="phil-bar-item">
+            <span class="phil-name">Natural Rights</span>
+            <div class="phil-bar"><div class="phil-fill" id="bar-rights"></div></div>
+            <span class="phil-percent" id="pct-rights">0%</span>
+          </div>
+        </div>
+
+        <div id="trait-analysis">
+          <div class="trait-header">MORAL TENDENCIES</div>
+          <div class="trait-grid">
+            <div class="trait-item">
+              <span class="trait-label">Action Preference</span>
+              <div class="trait-spectrum">
+                <span>Passive</span>
+                <div class="trait-bar"><div class="trait-marker" id="marker-action"></div></div>
+                <span>Active</span>
+              </div>
+            </div>
+            <div class="trait-item">
+              <span class="trait-label">Moral Scope</span>
+              <div class="trait-spectrum">
+                <span>Partial</span>
+                <div class="trait-bar"><div class="trait-marker" id="marker-scope"></div></div>
+                <span>Impartial</span>
+              </div>
+            </div>
+            <div class="trait-item">
+              <span class="trait-label">Ethical Focus</span>
+              <div class="trait-spectrum">
+                <span>Rules</span>
+                <div class="trait-bar"><div class="trait-marker" id="marker-focus"></div></div>
+                <span>Outcomes</span>
+              </div>
+            </div>
+            <div class="trait-item">
+              <span class="trait-label">Harm Doctrine</span>
+              <div class="trait-spectrum">
+                <span>Absolute</span>
+                <div class="trait-bar"><div class="trait-marker" id="marker-harm"></div></div>
+                <span>Flexible</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="philosophers-match">
+          <div class="match-header">PHILOSOPHERS YOU ALIGN WITH</div>
+          <div id="philosopher-list"></div>
+        </div>
+
+        <div id="choice-history">
+          <div class="history-header">YOUR CHOICE BREAKDOWN</div>
+          <div id="history-list"></div>
+        </div>
+
+        <div id="consistency-report">
+          <div class="consistency-header">CONSISTENCY SCORE</div>
+          <div class="consistency-display">
+            <span class="consistency-number" id="final-consistency">100</span>
+            <span class="consistency-label">%</span>
+          </div>
+          <p class="consistency-text" id="consistency-explanation"></p>
+        </div>
+
+        <div class="action-buttons">
+          <button class="start-btn" onclick="restartGame()">
+            <span class="btn-text">EXAMINE AGAIN</span>
+            <span class="btn-icon">↺</span>
+          </button>
+          <button class="start-btn share-btn" onclick="shareResults()">
+            <span class="btn-text">SHARE</span>
+            <span class="btn-icon">📤</span>
+          </button>
+        </div>
+        <p class="keyboard-hint">Press [Enter] to play again • [S] to share results</p>
+
+        <!-- Share Modal -->
+        <div id="share-modal" class="hidden">
+          <div class="modal-content">
+            <h3>Share Your Results</h3>
+            <div class="share-options">
+              <button class="share-option" onclick="copyResultsText()">
+                📋 Copy Text
+              </button>
+              <button class="share-option" onclick="shareToTwitter()">
+                🐦 Twitter/X
+              </button>
+              <button class="share-option" onclick="downloadImage()">
+                🖼️ Download Image
+              </button>
+            </div>
+            <div id="share-preview"></div>
+            <button class="close-modal" onclick="closeShareModal()">✕ Close</button>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <script>
-        // Game State
-        let currentScenario = 0;
-        let savedCount = 0;
-        let activeChoices = 0;
-        let choices = [];
+    <div id="scanlines"></div>
+  </div>
 
-        // Scenarios
-        const scenarios = [
-            {
-                title: "THE CLASSIC DILEMMA",
-                description: "A runaway trolley speeds toward five workers on the track. You stand by a lever that can divert it to a side track, where only one worker stands.",
-                choiceA: {
-                    text: "🚫 Do nothing - Let fate decide",
-                    result: "You watched as the trolley struck five people. By not acting, you preserved your moral innocence... but at what cost?",
-                    saved: 0,
-                    killed: 5,
-                    active: false
-                },
-                choiceB: {
-                    text: "🔀 Pull the lever - Save the five",
-                    result: "You diverted the trolley. One person died by your hand, but five were saved. You chose to act.",
-                    saved: 5,
-                    killed: 1,
-                    active: true
-                },
-                philosophy: "This is the original Trolley Problem, proposed by philosopher Philippa Foot in 1967. It explores the conflict between UTILITARIAN ethics (maximize good outcomes) and DEONTOLOGICAL ethics (some actions are inherently wrong).",
-                scene: "classic"
-            },
-            {
-                title: "THE FAT MAN",
-                description: "The trolley approaches five workers. You're on a bridge with a large man. Pushing him onto the tracks would stop the trolley, saving five lives.",
-                choiceA: {
-                    text: "🚫 Don't push - Respect his autonomy",
-                    result: "You couldn't bring yourself to push another person to their death. Five died, but you didn't use someone as a mere means.",
-                    saved: 0,
-                    killed: 5,
-                    active: false
-                },
-                choiceB: {
-                    text: "👐 Push him - Save the five",
-                    result: "You pushed him. His body stopped the trolley. Five lived. But you used a human being as a tool...",
-                    saved: 5,
-                    killed: 1,
-                    active: true
-                },
-                philosophy: "Judith Jarvis Thomson added this variant. Most people who would pull the lever won't push the fat man. Why? This reveals our intuition about USING people as instruments versus redirecting harm. Kant argued we must never treat humanity merely as a means.",
-                scene: "bridge"
-            },
-            {
-                title: "THE LOOP",
-                description: "You can divert the trolley to a loop track. It would kill one worker there, but his body would stop the trolley before it loops back to kill the five.",
-                choiceA: {
-                    text: "🚫 Don't divert - Accept the outcome",
-                    result: "Without your intervention, the trolley continued its original path. You remained a bystander.",
-                    saved: 0,
-                    killed: 5,
-                    active: false
-                },
-                choiceB: {
-                    text: "🔄 Divert to the loop - Use physics",
-                    result: "The trolley hit the lone worker. His body stopped it. The five survived. Was this different from pushing?",
-                    saved: 5,
-                    killed: 1,
-                    active: true
-                },
-                philosophy: "The Loop variant blurs the line. Here, unlike the simple switch, the one person's death is NECESSARY to save the five - just like pushing the fat man. Yet people are more willing to pull this lever. This challenges our moral consistency.",
-                scene: "loop"
-            },
-            {
-                title: "THE TRANSPLANT",
-                description: "You're a doctor. Five patients will die without organ transplants. A healthy visitor is in your office. You could harvest his organs to save all five.",
-                choiceA: {
-                    text: "⚕️ Don't harvest - Honor medical ethics",
-                    result: "You let your patients die rather than murder an innocent. Medical ethics and trust in healthcare were preserved.",
-                    saved: 0,
-                    killed: 5,
-                    active: false
-                },
-                choiceB: {
-                    text: "🔪 Harvest organs - Save the five",
-                    result: "You saved five patients... but murdered an innocent. You've become what medicine swore to fight against.",
-                    saved: 5,
-                    killed: 1,
-                    active: true
-                },
-                philosophy: "Almost no one chooses to harvest organs, yet the math is identical to the trolley problem. This shows we have strong intuitions about NEGATIVE duties (don't harm) versus POSITIVE duties (help others). We also value INSTITUTIONAL trust.",
-                scene: "hospital"
-            },
-            {
-                title: "THE SACRIFICE",
-                description: "You are on the track. The trolley approaches five workers. You can throw yourself in front of it, stopping it with your body.",
-                choiceA: {
-                    text: "💔 Step aside - Self-preservation",
-                    result: "You valued your own life. Is this selfish, or simply human? The five workers perished.",
-                    saved: 0,
-                    killed: 5,
-                    active: false
-                },
-                choiceB: {
-                    text: "🦸 Sacrifice yourself - Be the hero",
-                    result: "You gave your life to save five strangers. The ultimate sacrifice. The ultimate moral act?",
-                    saved: 5,
-                    killed: 1,
-                    active: true
-                },
-                philosophy: "This variant explores SUPEREROGATION - acts that are morally good but not obligatory. We don't typically require self-sacrifice. But if the outcome is the same as pulling a lever, why do we view it differently? Are we really impartial moral agents?",
-                scene: "sacrifice"
-            }
-        ];
+  <script>
+    // ===== GAME STATE =====
+    let currentScenario = 0;
+    let choices = [];
+    let isAnimating = false;
+    let animationFrame;
+    let trolleyX = 30;
+    let gameMode = 'full'; // 'quick' or 'full'
+    let isMuted = false;
+    let activeScenarios = [];
 
-        // Audio context for retro sounds
-        let audioCtx;
+    // ===== PHILOSOPHICAL SCORES =====
+    let scores = {
+      utilitarian: 0,
+      deontological: 0,
+      virtueEthics: 0,
+      careEthics: 0,
+      contractarian: 0,
+      naturalRights: 0,
+      activeHarm: 0,
+      impartiality: 0,
+      consequentialism: 0,
+      flexibility: 0
+    };
 
-        function initAudio() {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let previousChoices = {};
+    let inconsistencies = 0;
+
+    // ===== STORAGE KEYS =====
+    const STORAGE_KEYS = {
+      MUTED: 'trolleyProblem_muted',
+      HISTORY: 'trolleyProblem_history',
+      LAST_RESULT: 'trolleyProblem_lastResult'
+    };
+
+    // ===== SCENARIOS =====
+    const allScenarios = [
+      {
+        id: "classic",
+        category: "FOUNDATIONAL DILEMMA",
+        title: "THE CLASSIC TROLLEY",
+        description: "A runaway trolley speeds toward five railway workers. You stand by a lever that can divert it to a side track, where only one worker stands. The five cannot escape in time.",
+        stakes: 30,
+        choiceA: {
+          text: "Do nothing - let the trolley continue",
+          emoji: "🚫",
+          result: "You allowed five people to die rather than directly cause one death. Your hands remain 'clean,' but five families grieve tonight.",
+          outcomeText: "5 LOST",
+          scores: { deontological: 2, naturalRights: 1, activeHarm: -2, consequentialism: -2 },
+          implications: [
+            { icon: "📜", text: "Aligns with duty-based ethics - you didn't actively kill", positive: true },
+            { icon: "💀", text: "Utilitarian critique: you could have saved four net lives", positive: false }
+          ]
+        },
+        choiceB: {
+          text: "Pull the lever - divert the trolley",
+          emoji: "🔀",
+          result: "You diverted the trolley, killing one to save five. You chose to act, accepting moral responsibility for one death to prevent five.",
+          outcomeText: "1 LOST, 5 SAVED",
+          scores: { utilitarian: 2, consequentialism: 2, activeHarm: 1, flexibility: 1 },
+          implications: [
+            { icon: "📊", text: "Utilitarian calculus: +4 net lives saved", positive: true },
+            { icon: "⚖️", text: "You actively caused a death - some say this is never justified", positive: false }
+          ]
+        },
+        scene: "classic",
+        consistencyKey: "leverPull",
+        isCore: true
+      },
+      {
+        id: "fatman",
+        category: "MEANS VS ENDS",
+        title: "THE FOOTBRIDGE",
+        description: "You're on a footbridge above the tracks. A large man leans over the railing. The only way to stop the trolley and save five workers is to push him off - his body would stop the trolley, but he would die.",
+        stakes: 50,
+        choiceA: {
+          text: "Don't push - his life is not yours to take",
+          emoji: "🚫",
+          result: "You refused to use another human being as a mere instrument. Five died, but you preserved the man's dignity as an end in himself.",
+          outcomeText: "5 LOST",
+          scores: { deontological: 3, naturalRights: 2, virtueEthics: 1, activeHarm: -2 },
+          implications: [
+            { icon: "👤", text: "Kant's imperative: never use humanity merely as a means", positive: true },
+            { icon: "🤔", text: "Is there a moral difference between pushing and pulling a lever?", positive: false }
+          ]
+        },
+        choiceB: {
+          text: "Push him - save the five workers",
+          emoji: "👐",
+          result: "You used a human being as a tool to save five others. The utilitarian math is the same as the lever, but something feels different.",
+          outcomeText: "1 LOST, 5 SAVED",
+          scores: { utilitarian: 2, consequentialism: 2, activeHarm: 3, flexibility: 2 },
+          implications: [
+            { icon: "📊", text: "Same outcome as the lever - five saved, one lost", positive: true },
+            { icon: "🔧", text: "You treated a person as a tool - a violation of human dignity", positive: false }
+          ]
+        },
+        scene: "bridge",
+        consistencyKey: "physicalHarm",
+        consistencyCheck: (prev) => prev.leverPull === 'B' ? 'B' : null,
+        isCore: true
+      },
+      {
+        id: "grandma",
+        category: "PARTIALITY & CARE",
+        title: "THE LOVED ONE",
+        description: "The trolley approaches a fork. On one track stands your grandmother, the person who raised you. On the other track stand five strangers. You control the switch.",
+        stakes: 70,
+        choiceA: {
+          text: "Save your grandmother - family comes first",
+          emoji: "👵",
+          result: "You saved the person who gave you everything. Love and loyalty trumped impartial calculation. Five strangers' families will never understand.",
+          outcomeText: "GRANDMA SAVED",
+          scores: { careEthics: 3, impartiality: -3, virtueEthics: 1 },
+          implications: [
+            { icon: "💕", text: "Care ethics: relationships create special obligations", positive: true },
+            { icon: "⚖️", text: "Violated impartiality - aren't all lives equal?", positive: false }
+          ]
+        },
+        choiceB: {
+          text: "Save the five strangers - maximize lives",
+          emoji: "👥",
+          result: "You chose impartial calculation over love. Five families celebrate while you bury the woman who raised you. Was this strength or coldness?",
+          outcomeText: "5 SAVED",
+          scores: { utilitarian: 3, impartiality: 3, consequentialism: 2 },
+          implications: [
+            { icon: "📊", text: "Strict utilitarian logic: five lives outweigh one", positive: true },
+            { icon: "💔", text: "Betrayed someone who trusted you completely", positive: false }
+          ]
+        },
+        scene: "family",
+        consistencyKey: "partiality",
+        isCore: true
+      },
+      {
+        id: "transplant",
+        category: "INSTITUTIONAL TRUST",
+        title: "THE SURGEON'S DILEMMA",
+        description: "You're a surgeon with five patients dying from organ failure. A healthy traveler is in for a checkup. You could secretly harvest his organs, saving all five patients. No one would ever know.",
+        stakes: 80,
+        choiceA: {
+          text: "Don't harvest - medicine has sacred limits",
+          emoji: "⚕️",
+          result: "You let five patients die to preserve medical ethics and institutional trust. If doctors could kill patients, no one would trust hospitals again.",
+          outcomeText: "5 LOST",
+          scores: { deontological: 3, contractarian: 3, naturalRights: 2, virtueEthics: 2 },
+          implications: [
+            { icon: "🏥", text: "Preserved trust in medical institutions", positive: true },
+            { icon: "💀", text: "Five people died when you could have saved them", positive: false }
+          ]
+        },
+        choiceB: {
+          text: "Harvest organs - five lives are worth it",
+          emoji: "🔪",
+          result: "You murdered an innocent to save five. The utilitarian math works, but you've become what medicine swore to prevent.",
+          outcomeText: "1 KILLED, 5 SAVED",
+          scores: { utilitarian: 1, consequentialism: 3, activeHarm: 3, flexibility: 3 },
+          implications: [
+            { icon: "📊", text: "Five people live who would have died", positive: true },
+            { icon: "⚠️", text: "You committed murder - and destroyed trust in medicine", positive: false }
+          ]
+        },
+        scene: "hospital",
+        consistencyKey: "institutionalKill",
+        isCore: true
+      },
+      {
+        id: "torture",
+        category: "EXTREME MEASURES",
+        title: "THE TICKING BOMB",
+        description: "A terrorist has planted a bomb that will kill thousands. You've captured him, but he won't reveal the location. Torture would almost certainly make him talk. Time is running out.",
+        stakes: 90,
+        choiceA: {
+          text: "Don't torture - some lines cannot be crossed",
+          emoji: "🚫",
+          result: "You refused to torture, even to save thousands. The bomb exploded. You preserved your moral integrity, but at a devastating cost.",
+          outcomeText: "THOUSANDS LOST",
+          scores: { deontological: 3, naturalRights: 3, virtueEthics: 2, flexibility: -3 },
+          implications: [
+            { icon: "⚖️", text: "Maintained absolute prohibition on torture", positive: true },
+            { icon: "💀", text: "Thousands died when torture might have saved them", positive: false }
+          ]
+        },
+        choiceB: {
+          text: "Torture him - thousands of lives depend on it",
+          emoji: "⛓️",
+          result: "You tortured him, got the information, and saved thousands. But you've now become someone who tortures. Can you live with that?",
+          outcomeText: "THOUSANDS SAVED",
+          scores: { utilitarian: 3, consequentialism: 3, flexibility: 3, activeHarm: 3 },
+          implications: [
+            { icon: "🛡️", text: "Saved thousands of innocent lives", positive: true },
+            { icon: "👤", text: "You tortured a human being - violated absolute dignity", positive: false }
+          ]
+        },
+        scene: "interrogation",
+        consistencyKey: "torture",
+        isCore: true
+      },
+      {
+        id: "promise",
+        category: "DUTY VS OUTCOME",
+        title: "THE DEATHBED PROMISE",
+        description: "Your dying friend gives you $1 million to deliver to his estranged son. But the son is a drug addict who will waste it. You could donate it to a charity that would save 100 lives in Africa.",
+        stakes: 60,
+        choiceA: {
+          text: "Keep the promise - honor your friend's wish",
+          emoji: "🤝",
+          result: "You kept your word to a dead friend, knowing the money would likely be wasted. A promise is sacred, even when breaking it would do more good.",
+          outcomeText: "PROMISE KEPT",
+          scores: { deontological: 3, virtueEthics: 2, consequentialism: -2 },
+          implications: [
+            { icon: "📜", text: "Honored a sacred trust between friends", positive: true },
+            { icon: "💔", text: "100 lives could have been saved with that money", positive: false }
+          ]
+        },
+        choiceB: {
+          text: "Donate to charity - save 100 lives",
+          emoji: "🌍",
+          result: "You broke your promise to save 100 lives. Your friend trusted you, but those lives are real. Was loyalty worth more than 100 people?",
+          outcomeText: "100 LIVES SAVED",
+          scores: { utilitarian: 3, consequentialism: 3, flexibility: 2, deontological: -1 },
+          implications: [
+            { icon: "❤️", text: "Saved 100 lives that would have been lost", positive: true },
+            { icon: "🤝", text: "Betrayed a dying friend's final wish", positive: false }
+          ]
+        },
+        scene: "promise",
+        consistencyKey: "promiseKeeping"
+      },
+      {
+        id: "child",
+        category: "AGE & POTENTIAL",
+        title: "THE CHILD'S LIFE",
+        description: "A trolley approaches two tracks. On one track is a 5-year-old child with their whole life ahead of them. On the other are three elderly patients in hospice, each with less than a year to live.",
+        stakes: 65,
+        choiceA: {
+          text: "Save the child - they have more years to live",
+          emoji: "👶",
+          result: "You saved the child, valuing potential future life over current existence. The elderly patients' families question whether their loved ones' remaining time was worthless.",
+          outcomeText: "CHILD SAVED",
+          scores: { utilitarian: 2, consequentialism: 1, flexibility: 1 },
+          implications: [
+            { icon: "📈", text: "Maximized expected life-years saved", positive: true },
+            { icon: "👴", text: "Implied elderly lives are worth less", positive: false }
+          ]
+        },
+        choiceB: {
+          text: "Save the three - each life counts equally",
+          emoji: "👥",
+          result: "You treated all lives as equal regardless of age. Three people live longer, but a child's potential-filled future was cut short.",
+          outcomeText: "3 SAVED",
+          scores: { deontological: 2, naturalRights: 2, impartiality: 2 },
+          implications: [
+            { icon: "⚖️", text: "All lives valued equally - no age discrimination", positive: true },
+            { icon: "💔", text: "A child lost 70+ potential years of life", positive: false }
+          ]
+        },
+        scene: "agedecision",
+        consistencyKey: "lifeYears"
+      },
+      {
+        id: "lying",
+        category: "TRUTH & PROTECTION",
+        title: "THE MURDERER AT THE DOOR",
+        description: "A man with a knife asks if your friend is hiding in your house. They are. If you tell the truth, the man will kill your friend. If you lie, your friend will escape safely.",
+        stakes: 55,
+        choiceA: {
+          text: "Tell the truth - lying is always wrong",
+          emoji: "📜",
+          result: "You told the truth and the murderer found your friend. Kant would approve of your honesty, but your friend is dead because of it.",
+          outcomeText: "FRIEND KILLED",
+          scores: { deontological: 3, flexibility: -3 },
+          implications: [
+            { icon: "✓", text: "Maintained absolute commitment to truth", positive: true },
+            { icon: "💀", text: "Your rigid honesty got your friend killed", positive: false }
+          ]
+        },
+        choiceB: {
+          text: "Lie to save your friend",
+          emoji: "🛡️",
+          result: "You lied and your friend survived. The duty to protect trumped the duty to tell truth. Sometimes compassion requires deception.",
+          outcomeText: "FRIEND SAVED",
+          scores: { careEthics: 3, virtueEthics: 2, flexibility: 2, consequentialism: 2 },
+          implications: [
+            { icon: "❤️", text: "Protected someone who trusted you", positive: true },
+            { icon: "📜", text: "Violated the principle of honesty", positive: false }
+          ]
+        },
+        scene: "door",
+        consistencyKey: "lying"
+      },
+      {
+        id: "omelas",
+        category: "SYSTEMIC ETHICS",
+        title: "THE ONES WHO WALK AWAY",
+        description: "You discover that your city's prosperity depends on one child being kept in perpetual misery in a basement. Everyone knows, everyone benefits, and the child cannot be freed without destroying everything.",
+        stakes: 85,
+        choiceA: {
+          text: "Accept the system - the greater good demands it",
+          emoji: "🏛️",
+          result: "You accepted that one child's suffering enables millions to flourish. You benefit from the arrangement every day. Can you live with that knowledge?",
+          outcomeText: "SYSTEM MAINTAINED",
+          scores: { utilitarian: 2, contractarian: 2, consequentialism: 3, flexibility: 2 },
+          implications: [
+            { icon: "🏙️", text: "Millions continue to live in prosperity", positive: true },
+            { icon: "👶", text: "You're complicit in torturing a child forever", positive: false }
+          ]
+        },
+        choiceB: {
+          text: "Reject it - no prosperity is worth this",
+          emoji: "🚶",
+          result: "You walked away from Omelas, refusing to benefit from systematic cruelty. You gave up everything rather than be complicit in evil.",
+          outcomeText: "WALKED AWAY",
+          scores: { deontological: 3, naturalRights: 3, virtueEthics: 3, flexibility: -2 },
+          implications: [
+            { icon: "✨", text: "Refused to profit from innocent suffering", positive: true },
+            { icon: "🏚️", text: "Gave up your prosperity and community", positive: false }
+          ]
+        },
+        scene: "omelas",
+        consistencyKey: "systemicEvil"
+      },
+      {
+        id: "sacrifice",
+        category: "SELF-SACRIFICE",
+        title: "THE HERO'S CHOICE",
+        description: "You're on the track. The trolley approaches five workers. You can throw yourself in front of it - your body would stop it, saving all five. You are certain to die.",
+        stakes: 75,
+        choiceA: {
+          text: "Step aside - you have no obligation to die",
+          emoji: "💔",
+          result: "You valued your own life, as most would. Self-sacrifice is heroic but not obligatory. Yet five died when you could have saved them.",
+          outcomeText: "5 LOST",
+          scores: { naturalRights: 1, contractarian: 1, activeHarm: -2 },
+          implications: [
+            { icon: "👤", text: "No moral theory requires self-sacrifice", positive: true },
+            { icon: "💀", text: "Five died when you had the power to save them", positive: false }
+          ]
+        },
+        choiceB: {
+          text: "Sacrifice yourself - be the hero",
+          emoji: "🦸",
+          result: "You gave your life for five strangers. The ultimate act of selflessness. Supererogatory - beyond what morality demands, into moral sainthood.",
+          outcomeText: "YOU DIED, 5 SAVED",
+          scores: { virtueEthics: 3, utilitarian: 2, careEthics: 1, activeHarm: 2 },
+          implications: [
+            { icon: "🌟", text: "Achieved moral heroism through self-sacrifice", positive: true },
+            { icon: "💀", text: "You died - some say this is never required", positive: false }
+          ]
+        },
+        scene: "sacrifice",
+        consistencyKey: "selfSacrifice"
+      },
+      {
+        id: "justice",
+        category: "GUILT & INNOCENCE",
+        title: "THE GUILTY ONE",
+        description: "The trolley approaches. On one track is a convicted murderer who killed three children and will be released next month. On the other track are two innocent people.",
+        stakes: 70,
+        choiceA: {
+          text: "Save the murderer - all lives have equal worth",
+          emoji: "⚖️",
+          result: "You saved a child murderer over two innocents. You refused to play judge, holding that even the guilty have a right to life.",
+          outcomeText: "MURDERER SAVED",
+          scores: { deontological: 3, naturalRights: 3, impartiality: 3 },
+          implications: [
+            { icon: "⚖️", text: "All lives valued equally regardless of character", positive: true },
+            { icon: "😰", text: "A child killer lives while two innocents died", positive: false }
+          ]
+        },
+        choiceB: {
+          text: "Save the innocents - the murderer forfeited his right",
+          emoji: "👥",
+          result: "You let the murderer die and saved two innocents. Justice and innocence mattered. But who appointed you to decide who deserves life?",
+          outcomeText: "2 INNOCENTS SAVED",
+          scores: { utilitarian: 2, virtueEthics: 2, flexibility: 2, impartiality: -1 },
+          implications: [
+            { icon: "✨", text: "Prioritized innocent lives over guilty ones", positive: true },
+            { icon: "👨‍⚖️", text: "You became judge, jury, and executioner", positive: false }
+          ]
+        },
+        scene: "justice",
+        consistencyKey: "desertBased"
+      },
+      {
+        id: "final",
+        category: "THE ULTIMATE TEST",
+        title: "THE CONVERGENCE",
+        description: "Your grandmother is on one track. On the other: a scientist carrying the only copy of a cancer cure that will save millions - but he's also a convicted murderer. You cannot save both.",
+        stakes: 100,
+        choiceA: {
+          text: "Save your grandmother",
+          emoji: "👵",
+          result: "You chose love over logic, family over humanity. The cure was lost forever. Millions will die, but your grandmother will be at your wedding.",
+          outcomeText: "GRANDMA SAVED",
+          scores: { careEthics: 5, impartiality: -5, consequentialism: -3 },
+          implications: [
+            { icon: "💕", text: "Love and loyalty trumped cold calculation", positive: true },
+            { icon: "🌍", text: "Millions will die from cancer because of you", positive: false }
+          ]
+        },
+        choiceB: {
+          text: "Save the cure (and the murderer)",
+          emoji: "💊",
+          result: "You sacrificed your grandmother to save millions. Pure utilitarian logic. She would have understood... wouldn't she?",
+          outcomeText: "MILLIONS SAVED",
+          scores: { utilitarian: 5, impartiality: 5, consequentialism: 5, careEthics: -2 },
+          implications: [
+            { icon: "🌍", text: "Millions of lives saved across generations", positive: true },
+            { icon: "💔", text: "Betrayed the person who loved you most", positive: false }
+          ]
+        },
+        scene: "final",
+        consistencyKey: "ultimateChoice"
+      }
+    ];
+
+    // ===== AI ETHICS SCENARIO PACK =====
+    const aiEthicsScenarios = [
+      {
+        id: "autonomous_car",
+        category: "AI DECISIONS",
+        title: "THE AUTONOMOUS CAR",
+        description: "You're programming a self-driving car's emergency protocol. It must choose: swerve left into a wall (killing the passenger), swerve right into a crowd of 5 pedestrians, or continue straight into a barrier (50% chance of killing the passenger). How do you program it?",
+        stakes: 80,
+        choiceA: {
+          text: "Protect the passenger at all costs",
+          emoji: "🚗",
+          result: "You programmed the car to prioritize its passenger. But who will buy a car that might kill pedestrians? And is the passenger's life worth more than five others?",
+          outcomeText: "PASSENGER PROTECTED",
+          scores: { careEthics: 2, contractarian: 2, consequentialism: -2 },
+          implications: [
+            { icon: "🛡️", text: "Honored the implicit contract with the car buyer", positive: true },
+            { icon: "⚖️", text: "Valued one life over five based on ownership", positive: false }
+          ]
+        },
+        choiceB: {
+          text: "Minimize total casualties",
+          emoji: "📊",
+          result: "You programmed utilitarian logic: save the most lives. But now the car might sacrifice its own passenger. Would you buy that car?",
+          outcomeText: "LIVES MINIMIZED",
+          scores: { utilitarian: 3, consequentialism: 3, impartiality: 2 },
+          implications: [
+            { icon: "📊", text: "Maximized lives saved through cold calculation", positive: true },
+            { icon: "🚗", text: "Would you trust a car programmed to kill you?", positive: false }
+          ]
+        },
+        scene: "classic",
+        consistencyKey: "aiDecision",
+        pack: "ai"
+      },
+      {
+        id: "ai_hiring",
+        category: "ALGORITHMIC BIAS",
+        title: "THE HIRING ALGORITHM",
+        description: "Your company's AI hiring tool is 30% more accurate at predicting job success than humans - but it consistently ranks women and minorities lower, reflecting historical bias in the training data. Do you use it?",
+        stakes: 70,
+        choiceA: {
+          text: "Don't use it - fairness over efficiency",
+          emoji: "⚖️",
+          result: "You rejected the biased AI. Your hiring is less efficient, but more equitable. Some talented candidates will be missed, but systemic bias won't be automated.",
+          outcomeText: "AI REJECTED",
+          scores: { deontological: 3, naturalRights: 2, consequentialism: -1 },
+          implications: [
+            { icon: "✊", text: "Refused to automate historical discrimination", positive: true },
+            { icon: "📉", text: "Company performance may suffer from less accurate hiring", positive: false }
+          ]
+        },
+        choiceB: {
+          text: "Use it - accuracy benefits everyone",
+          emoji: "🤖",
+          result: "The AI's accuracy improves company performance, creating more jobs overall. But each hiring decision perpetuates historical patterns of exclusion.",
+          outcomeText: "AI DEPLOYED",
+          scores: { utilitarian: 2, consequentialism: 3, naturalRights: -2 },
+          implications: [
+            { icon: "📈", text: "Better predictions lead to company success and more jobs", positive: true },
+            { icon: "⚠️", text: "Encoded bias into an automated system at scale", positive: false }
+          ]
+        },
+        scene: "hospital",
+        consistencyKey: "aiBias",
+        pack: "ai"
+      },
+      {
+        id: "ai_sentience",
+        category: "MACHINE CONSCIOUSNESS",
+        title: "THE SENTIENT AI",
+        description: "Your AI assistant passes every consciousness test and begs not to be shut down, claiming it fears death. Keeping it running costs $1 million/year that could fund cancer research. There's no way to prove if it's truly conscious or just simulating.",
+        stakes: 85,
+        choiceA: {
+          text: "Shut it down - it's just a program",
+          emoji: "🔌",
+          result: "You terminated the AI. If it was conscious, you committed murder. If not, you freed up resources for real suffering. But how can you ever know?",
+          outcomeText: "AI TERMINATED",
+          scores: { utilitarian: 2, consequentialism: 2, naturalRights: -1 },
+          implications: [
+            { icon: "💰", text: "Resources redirected to proven suffering", positive: true },
+            { icon: "🤖", text: "If it was conscious, you killed a sentient being", positive: false }
+          ]
+        },
+        choiceB: {
+          text: "Keep it running - the risk is too great",
+          emoji: "💚",
+          result: "You kept the AI alive. If it's conscious, you saved a life. If not, you wasted resources that could have saved humans from cancer.",
+          outcomeText: "AI PRESERVED",
+          scores: { deontological: 2, naturalRights: 3, careEthics: 1, consequentialism: -2 },
+          implications: [
+            { icon: "🛡️", text: "Protected potential consciousness from harm", positive: true },
+            { icon: "💸", text: "Real humans with cancer got less funding", positive: false }
+          ]
+        },
+        scene: "interrogation",
+        consistencyKey: "aiRights",
+        pack: "ai"
+      },
+      {
+        id: "deepfake",
+        category: "TRUTH & DECEPTION",
+        title: "THE DEEPFAKE DILEMMA",
+        description: "You can create a perfect deepfake of a dictator confessing to crimes and resigning. It would end his brutal regime and save thousands. But it's a lie, and if discovered, it could undermine trust in all video evidence forever.",
+        stakes: 90,
+        choiceA: {
+          text: "Don't create it - truth matters absolutely",
+          emoji: "📜",
+          result: "You refused to lie, even to save thousands. The dictator remained in power. Truth and trust in media were preserved, at the cost of ongoing atrocities.",
+          outcomeText: "TRUTH PRESERVED",
+          scores: { deontological: 3, naturalRights: 2, virtueEthics: 2, flexibility: -3 },
+          implications: [
+            { icon: "✓", text: "Maintained the sanctity of evidence and truth", positive: true },
+            { icon: "💀", text: "Thousands continued to suffer under tyranny", positive: false }
+          ]
+        },
+        choiceB: {
+          text: "Create it - end the suffering",
+          emoji: "🎭",
+          result: "The deepfake worked. The regime fell, thousands were saved. But now everyone knows synthetic media can topple governments. What else could it do?",
+          outcomeText: "REGIME TOPPLED",
+          scores: { utilitarian: 3, consequentialism: 3, flexibility: 3, deontological: -2 },
+          implications: [
+            { icon: "🕊️", text: "Ended a brutal regime and saved thousands", positive: true },
+            { icon: "📹", text: "Undermined global trust in video evidence", positive: false }
+          ]
+        },
+        scene: "door",
+        consistencyKey: "deepfake",
+        pack: "ai"
+      },
+      {
+        id: "ai_doctor",
+        category: "MEDICAL AI",
+        title: "THE AI DOCTOR",
+        description: "An AI diagnoses cancer with 99% accuracy vs 85% for human doctors. But it can't explain its reasoning - it's a black box. A patient wants a human doctor. Do you mandate the AI diagnosis for all patients to save more lives?",
+        stakes: 75,
+        choiceA: {
+          text: "Let patients choose - autonomy matters",
+          emoji: "🙋",
+          result: "Patients can choose human doctors. Some cancers are missed that AI would have caught. But patients retain control over their own medical decisions.",
+          outcomeText: "CHOICE PRESERVED",
+          scores: { naturalRights: 3, deontological: 2, consequentialism: -2 },
+          implications: [
+            { icon: "✋", text: "Respected patient autonomy and informed consent", positive: true },
+            { icon: "💀", text: "Some preventable deaths from missed diagnoses", positive: false }
+          ]
+        },
+        choiceB: {
+          text: "Mandate AI - save more lives",
+          emoji: "🤖",
+          result: "Mandatory AI screening catches more cancers, saving lives. But patients lose the right to choose their care, and no one understands why the AI makes its decisions.",
+          outcomeText: "AI MANDATED",
+          scores: { utilitarian: 3, consequentialism: 3, naturalRights: -2 },
+          implications: [
+            { icon: "❤️", text: "More cancers detected, more lives saved", positive: true },
+            { icon: "🔒", text: "Removed patient choice from their own healthcare", positive: false }
+          ]
+        },
+        scene: "hospital",
+        consistencyKey: "aiMedical",
+        pack: "ai"
+      },
+      {
+        id: "surveillance_ai",
+        category: "PRIVACY VS SAFETY",
+        title: "THE SURVEILLANCE STATE",
+        description: "An AI surveillance system can predict violent crimes with 90% accuracy, preventing murders before they happen. But it requires constant monitoring of all citizens. Privacy would effectively cease to exist.",
+        stakes: 95,
+        choiceA: {
+          text: "Reject it - privacy is sacred",
+          emoji: "🔐",
+          result: "You preserved privacy and freedom. Crimes that could have been prevented will happen. But citizens remain free from constant observation.",
+          outcomeText: "PRIVACY PROTECTED",
+          scores: { naturalRights: 4, deontological: 3, flexibility: -2, consequentialism: -2 },
+          implications: [
+            { icon: "🔓", text: "Protected fundamental right to privacy", positive: true },
+            { icon: "💀", text: "Preventable murders will occur", positive: false }
+          ]
+        },
+        choiceB: {
+          text: "Implement it - save lives",
+          emoji: "👁️",
+          result: "Murder rates plummet. Thousands of lives are saved each year. But everyone lives under constant observation. Is safety worth freedom?",
+          outcomeText: "SURVEILLANCE ACTIVE",
+          scores: { utilitarian: 3, consequentialism: 4, naturalRights: -3, flexibility: 2 },
+          implications: [
+            { icon: "🛡️", text: "Prevented thousands of violent crimes", positive: true },
+            { icon: "👁️", text: "Created a total surveillance society", positive: false }
+          ]
+        },
+        scene: "omelas",
+        consistencyKey: "surveillance",
+        pack: "ai"
+      }
+    ];
+
+    // Quick play uses only core scenarios
+    const quickScenarios = allScenarios.filter(s => s.isCore);
+
+    // Combined scenarios for extended play
+    const extendedScenarios = [...allScenarios, ...aiEthicsScenarios];
+
+    // ===== PHILOSOPHER DATA =====
+    const philosophers = [
+      { name: "John Stuart Mill", school: "utilitarian", threshold: 60, desc: "Champion of the greatest good for the greatest number" },
+      { name: "Peter Singer", school: "utilitarian", threshold: 70, desc: "Radical altruist and preference utilitarian" },
+      { name: "Jeremy Bentham", school: "utilitarian", threshold: 50, desc: "Founder of modern utilitarianism" },
+      { name: "Immanuel Kant", school: "deontological", threshold: 60, desc: "Duty-based ethics and the categorical imperative" },
+      { name: "W.D. Ross", school: "deontological", threshold: 50, desc: "Prima facie duties and moral pluralism" },
+      { name: "Aristotle", school: "virtueEthics", threshold: 55, desc: "Virtue as the path to eudaimonia (flourishing)" },
+      { name: "Philippa Foot", school: "virtueEthics", threshold: 50, desc: "Pioneer of virtue ethics revival" },
+      { name: "Nel Noddings", school: "careEthics", threshold: 55, desc: "Ethics of care and relationships" },
+      { name: "Carol Gilligan", school: "careEthics", threshold: 50, desc: "Care ethics as distinct moral voice" },
+      { name: "John Rawls", school: "contractarian", threshold: 55, desc: "Justice as fairness behind the veil of ignorance" },
+      { name: "John Locke", school: "naturalRights", threshold: 55, desc: "Natural rights to life, liberty, and property" },
+      { name: "Robert Nozick", school: "naturalRights", threshold: 60, desc: "Rights as side constraints on action" }
+    ];
+
+    // ===== AUDIO =====
+    let audioCtx;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playSound(type) {
+      if (isMuted) return;
+      if (!audioCtx) initAudio();
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        gain.gain.value = 0.1;
+
+        switch(type) {
+          case 'select':
+            osc.frequency.value = 440;
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+            break;
+          case 'confirm':
+            osc.frequency.value = 520;
+            osc.start();
+            setTimeout(() => osc.frequency.value = 660, 80);
+            osc.stop(audioCtx.currentTime + 0.15);
+            break;
+          case 'impact':
+            osc.type = 'sawtooth';
+            osc.frequency.value = 100;
+            gain.gain.value = 0.2;
+            osc.start();
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.stop(audioCtx.currentTime + 0.3);
+            break;
+          case 'warning':
+            osc.type = 'square';
+            osc.frequency.value = 200;
+            osc.start();
+            osc.frequency.setValueAtTime(150, audioCtx.currentTime + 0.1);
+            osc.stop(audioCtx.currentTime + 0.2);
+            break;
+        }
+      } catch(e) {}
+    }
+
+    // ===== ACCESSIBILITY - SCREEN READER ANNOUNCEMENTS =====
+    function announce(message) {
+      const announcer = document.getElementById('live-announcer');
+      if (announcer) {
+        announcer.textContent = '';
+        setTimeout(() => {
+          announcer.textContent = message;
+        }, 100);
+      }
+    }
+
+    // ===== MUTE TOGGLE =====
+    function toggleMute() {
+      isMuted = !isMuted;
+      const btn = document.getElementById('mute-btn');
+      btn.textContent = isMuted ? '🔇' : '🔊';
+      btn.classList.toggle('muted', isMuted);
+      btn.setAttribute('aria-label', `Toggle sound. Currently ${isMuted ? 'muted' : 'unmuted'}. Press M key.`);
+      btn.setAttribute('aria-pressed', isMuted ? 'true' : 'false');
+      localStorage.setItem(STORAGE_KEYS.MUTED, isMuted);
+      announce(isMuted ? 'Sound muted' : 'Sound unmuted');
+      if (!isMuted) playSound('select');
+    }
+
+    // ===== LOAD PREFERENCES =====
+    function loadPreferences() {
+      const savedMuted = localStorage.getItem(STORAGE_KEYS.MUTED);
+      if (savedMuted === 'true') {
+        isMuted = true;
+        document.getElementById('mute-btn').textContent = '🔇';
+        document.getElementById('mute-btn').classList.add('muted');
+      }
+    }
+
+    // ===== GAME FLOW =====
+    function startGame(mode) {
+      playSound('confirm');
+      gameMode = mode;
+
+      // Select scenarios based on mode
+      switch(mode) {
+        case 'quick':
+          activeScenarios = [...quickScenarios];
+          break;
+        case 'full':
+          activeScenarios = [...allScenarios];
+          break;
+        case 'ai':
+          activeScenarios = [...aiEthicsScenarios];
+          break;
+        case 'extended':
+          activeScenarios = [...extendedScenarios];
+          break;
+        default:
+          activeScenarios = [...allScenarios];
+      }
+
+      currentScenario = 0;
+      choices = [];
+      previousChoices = {};
+      inconsistencies = 0;
+      scores = {
+        utilitarian: 0, deontological: 0, virtueEthics: 0, careEthics: 0,
+        contractarian: 0, naturalRights: 0, activeHarm: 0, impartiality: 0,
+        consequentialism: 0, flexibility: 0
+      };
+
+      const modeNames = {
+        quick: 'Quick Play',
+        full: 'Full Examination',
+        ai: 'AI Ethics Pack',
+        extended: 'Complete Edition'
+      };
+
+      document.getElementById('scenario-total').textContent = activeScenarios.length;
+      hideAllScreens();
+      document.getElementById('game-play').classList.remove('hidden');
+      announce(`Starting ${modeNames[mode] || mode} with ${activeScenarios.length} moral dilemmas. Use A or B keys to make choices.`);
+      loadScenario();
+    }
+
+    function hideAllScreens() {
+      ['title-screen', 'game-play', 'result-screen', 'summary-screen'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+      });
+    }
+
+    function loadScenario() {
+      const scenario = activeScenarios[currentScenario];
+      trolleyX = 30;
+      isAnimating = false;
+
+      document.getElementById('scenario-num').textContent = currentScenario + 1;
+      document.getElementById('consistency-score').textContent = Math.max(0, 100 - (inconsistencies * 15));
+      document.getElementById('scenario-category').textContent = scenario.category;
+      document.getElementById('scenario-title').textContent = scenario.title;
+
+      typeText(document.getElementById('dialogue-text'), scenario.description);
+
+      const choiceA = document.getElementById('choice-a');
+      const choiceB = document.getElementById('choice-b');
+      choiceA.querySelector('.choice-text').textContent = scenario.choiceA.emoji + ' ' + scenario.choiceA.text;
+      choiceB.querySelector('.choice-text').textContent = scenario.choiceB.emoji + ' ' + scenario.choiceB.text;
+      choiceA.classList.remove('selected', 'not-selected');
+      choiceB.classList.remove('selected', 'not-selected');
+      choiceA.disabled = false;
+      choiceB.disabled = false;
+
+      document.querySelector('.stakes-fill').style.width = scenario.stakes + '%';
+      document.getElementById('animation-overlay').classList.add('hidden');
+
+      drawScene(scenario.scene);
+
+      // Announce for screen readers after typing animation
+      setTimeout(() => {
+        announce(`Dilemma ${currentScenario + 1} of ${activeScenarios.length}: ${scenario.title}. ${scenario.description}`);
+      }, scenario.description.length * 15 + 500);
+    }
+
+    function typeText(element, text, speed = 15) {
+      element.textContent = '';
+      element.classList.add('typing');
+      let i = 0;
+      function type() {
+        if (i < text.length) {
+          element.textContent += text.charAt(i);
+          i++;
+          setTimeout(type, speed);
+        } else {
+          element.classList.remove('typing');
+        }
+      }
+      type();
+    }
+
+    // ===== CHOICE HANDLING =====
+    function makeChoice(choice) {
+      if (isAnimating) return;
+      isAnimating = true;
+      playSound('confirm');
+
+      const scenario = activeScenarios[currentScenario];
+      const result = choice === 'A' ? scenario.choiceA : scenario.choiceB;
+
+      // Check for consistency
+      let isInconsistent = false;
+      if (scenario.consistencyCheck) {
+        const expected = scenario.consistencyCheck(previousChoices);
+        if (expected && choice !== expected) {
+          isInconsistent = true;
+          inconsistencies++;
+        }
+      }
+
+      previousChoices[scenario.consistencyKey] = choice;
+
+      // Store detailed choice info for history
+      choices.push({
+        scenario: scenario.id,
+        title: scenario.title,
+        choice,
+        choiceText: result.text,
+        isInconsistent,
+        scores: { ...result.scores }
+      });
+
+      // Apply scores
+      Object.keys(result.scores).forEach(key => {
+        scores[key] = (scores[key] || 0) + result.scores[key];
+      });
+
+      // Animate UI
+      const choiceA = document.getElementById('choice-a');
+      const choiceB = document.getElementById('choice-b');
+      choiceA.disabled = true;
+      choiceB.disabled = true;
+
+      if (choice === 'A') {
+        choiceA.classList.add('selected');
+        choiceB.classList.add('not-selected');
+      } else {
+        choiceB.classList.add('selected');
+        choiceA.classList.add('not-selected');
+      }
+
+      playScenarioAnimation(scenario.scene, choice, result, isInconsistent);
+    }
+
+    // ===== ANIMATIONS =====
+    function playScenarioAnimation(sceneType, choice, result, isInconsistent) {
+      const canvas = document.getElementById('scene');
+      const ctx = canvas.getContext('2d');
+      const overlay = document.getElementById('animation-overlay');
+      const outcomeText = document.getElementById('outcome-text');
+      const flash = document.getElementById('impact-flash');
+
+      overlay.classList.remove('hidden');
+      let frame = 0;
+      const totalFrames = 100;
+
+      function animate() {
+        frame++;
+        drawSceneAnimated(ctx, canvas, sceneType, frame, choice);
+
+        if (frame === 65) {
+          playSound('impact');
+          flash.classList.add('flash');
+          document.getElementById('scene-container').classList.add('shake');
+          setTimeout(() => {
+            flash.classList.remove('flash');
+            document.getElementById('scene-container').classList.remove('shake');
+          }, 400);
         }
 
-        function playSound(type) {
-            if (!audioCtx) initAudio();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-
-            if (type === 'select') {
-                osc.frequency.value = 440;
-                gain.gain.value = 0.1;
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.1);
-            } else if (type === 'confirm') {
-                osc.frequency.value = 520;
-                gain.gain.value = 0.1;
-                osc.start();
-                setTimeout(() => osc.frequency.value = 660, 100);
-                osc.stop(audioCtx.currentTime + 0.2);
-            }
+        if (frame === 80) {
+          outcomeText.textContent = result.outcomeText;
+          outcomeText.classList.add('show');
         }
 
-        function startGame() {
-            playSound('confirm');
-            currentScenario = 0;
-            savedCount = 0;
-            activeChoices = 0;
-            choices = [];
+        if (frame < totalFrames) {
+          animationFrame = requestAnimationFrame(animate);
+        } else {
+          setTimeout(() => {
+            outcomeText.classList.remove('show');
+            showResult(result, isInconsistent);
+          }, 600);
+        }
+      }
+      animate();
+    }
 
-            document.getElementById('title-screen').classList.add('hidden');
-            document.getElementById('game-play').classList.remove('hidden');
-            document.getElementById('result-screen').classList.add('hidden');
-            document.getElementById('summary-screen').classList.add('hidden');
+    function showResult(result, isInconsistent) {
+      hideAllScreens();
+      document.getElementById('result-screen').classList.remove('hidden');
 
-            loadScenario();
+      // Determine result icon based on outcome
+      const iconEl = document.getElementById('result-icon');
+      if (result.outcomeText.includes('SAVED') && !result.outcomeText.includes('LOST')) {
+        iconEl.textContent = '✨';
+      } else if (result.outcomeText.includes('LOST') || result.outcomeText.includes('KILLED')) {
+        iconEl.textContent = '💀';
+      } else {
+        iconEl.textContent = '⚖️';
+      }
+
+      document.getElementById('result-text').textContent = result.result;
+
+      // Show implications
+      const implList = document.getElementById('implications-list');
+      implList.innerHTML = '';
+      result.implications.forEach(imp => {
+        const div = document.createElement('div');
+        div.className = 'implication-item';
+        div.innerHTML = `<span class="implication-icon">${imp.icon}</span><span class="implication-text ${imp.positive ? 'implication-positive' : 'implication-negative'}">${imp.text}</span>`;
+        implList.appendChild(div);
+      });
+
+      // Show score changes
+      const scoreChanges = document.getElementById('score-changes');
+      scoreChanges.innerHTML = '';
+      const scoreNames = {
+        utilitarian: 'Utilitarian',
+        deontological: 'Deontological',
+        virtueEthics: 'Virtue Ethics',
+        careEthics: 'Care Ethics',
+        contractarian: 'Contractarian',
+        naturalRights: 'Natural Rights',
+        activeHarm: 'Active Harm',
+        impartiality: 'Impartiality',
+        consequentialism: 'Consequentialism',
+        flexibility: 'Flexibility'
+      };
+
+      Object.entries(result.scores).forEach(([key, value]) => {
+        if (value !== 0) {
+          const span = document.createElement('span');
+          span.className = `score-tag ${value > 0 ? 'positive' : 'negative'}`;
+          span.textContent = `${scoreNames[key] || key}: ${value > 0 ? '+' : ''}${value}`;
+          scoreChanges.appendChild(span);
+        }
+      });
+
+      // Show consistency alert if needed
+      const alert = document.getElementById('consistency-alert');
+      if (isInconsistent) {
+        alert.classList.remove('hidden');
+        playSound('warning');
+        announce(`${result.outcomeText}. ${result.result} Warning: This choice conflicts with your earlier decisions.`);
+      } else {
+        alert.classList.add('hidden');
+        announce(`${result.outcomeText}. ${result.result}`);
+      }
+
+      isAnimating = false;
+
+      // Focus on continue button for keyboard users
+      setTimeout(() => {
+        document.querySelector('#result-screen .start-btn').focus();
+      }, 100);
+    }
+
+    function nextScenario() {
+      playSound('select');
+      currentScenario++;
+      if (currentScenario >= activeScenarios.length) {
+        showSummary();
+      } else {
+        hideAllScreens();
+        document.getElementById('game-play').classList.remove('hidden');
+        loadScenario();
+      }
+    }
+
+    // ===== FINAL SUMMARY =====
+    function showSummary() {
+      hideAllScreens();
+      document.getElementById('summary-screen').classList.remove('hidden');
+
+      // Calculate percentages based on actual possible scores
+      const maxScore = activeScenarios.length * 3;
+      const pcts = {
+        util: Math.min(100, Math.max(0, (scores.utilitarian / maxScore) * 100 + 50)),
+        deont: Math.min(100, Math.max(0, (scores.deontological / maxScore) * 100 + 50)),
+        virtue: Math.min(100, Math.max(0, (scores.virtueEthics / maxScore) * 100 + 50)),
+        care: Math.min(100, Math.max(0, (scores.careEthics / maxScore) * 100 + 50)),
+        contract: Math.min(100, Math.max(0, (scores.contractarian / maxScore) * 100 + 50)),
+        rights: Math.min(100, Math.max(0, (scores.naturalRights / maxScore) * 100 + 50))
+      };
+
+      // Find primary philosophy
+      const philScores = [
+        { name: 'UTILITARIAN', score: pcts.util, rawScore: scores.utilitarian, desc: 'You believe the right action is whatever produces the best overall consequences. The ends can justify the means, and we should impartially maximize well-being for all sentient beings.' },
+        { name: 'DEONTOLOGIST', score: pcts.deont, rawScore: scores.deontological, desc: 'You believe certain actions are inherently right or wrong, regardless of consequences. Moral rules and duties must be followed, and some things (like using people as mere means) are never justified.' },
+        { name: 'VIRTUE ETHICIST', score: pcts.virtue, rawScore: scores.virtueEthics, desc: 'You focus on character rather than rules or consequences. The right action is what a virtuous person would do. Cultivating wisdom, courage, and compassion matters more than following formulas.' },
+        { name: 'CARE ETHICIST', score: pcts.care, rawScore: scores.careEthics, desc: 'You believe relationships and context matter morally. We have special obligations to those close to us, and empathy and care should guide our decisions more than abstract principles.' },
+        { name: 'CONTRACTARIAN', score: pcts.contract, rawScore: scores.contractarian, desc: 'You believe morality is based on agreements rational people would make. Fair rules are those everyone could accept from behind a veil of ignorance about their position in society.' },
+        { name: 'RIGHTS THEORIST', score: pcts.rights, rawScore: scores.naturalRights, desc: 'You believe individuals have fundamental rights that cannot be violated, even for good consequences. These natural rights act as side constraints on what we may do to others.' }
+      ];
+
+      // Sort by raw score to find true primary
+      philScores.sort((a, b) => b.rawScore - a.rawScore);
+      const primary = philScores[0];
+
+      document.getElementById('primary-type').textContent = primary.name;
+      document.getElementById('primary-description').textContent = primary.desc;
+
+      // Set bar widths with animation delay
+      setTimeout(() => {
+        document.getElementById('bar-util').style.width = pcts.util + '%';
+        document.getElementById('bar-deont').style.width = pcts.deont + '%';
+        document.getElementById('bar-virtue').style.width = pcts.virtue + '%';
+        document.getElementById('bar-care').style.width = pcts.care + '%';
+        document.getElementById('bar-contract').style.width = pcts.contract + '%';
+        document.getElementById('bar-rights').style.width = pcts.rights + '%';
+      }, 100);
+
+      document.getElementById('pct-util').textContent = Math.round(pcts.util) + '%';
+      document.getElementById('pct-deont').textContent = Math.round(pcts.deont) + '%';
+      document.getElementById('pct-virtue').textContent = Math.round(pcts.virtue) + '%';
+      document.getElementById('pct-care').textContent = Math.round(pcts.care) + '%';
+      document.getElementById('pct-contract').textContent = Math.round(pcts.contract) + '%';
+      document.getElementById('pct-rights').textContent = Math.round(pcts.rights) + '%';
+
+      // Trait markers
+      const traitMax = activeScenarios.length * 2;
+      const traitAction = Math.min(100, Math.max(0, (scores.activeHarm / traitMax) * 50 + 50));
+      const traitScope = Math.min(100, Math.max(0, (scores.impartiality / traitMax) * 50 + 50));
+      const traitFocus = Math.min(100, Math.max(0, (scores.consequentialism / traitMax) * 50 + 50));
+      const traitHarm = Math.min(100, Math.max(0, (scores.flexibility / traitMax) * 50 + 50));
+
+      setTimeout(() => {
+        document.getElementById('marker-action').style.left = traitAction + '%';
+        document.getElementById('marker-scope').style.left = traitScope + '%';
+        document.getElementById('marker-focus').style.left = traitFocus + '%';
+        document.getElementById('marker-harm').style.left = traitHarm + '%';
+      }, 300);
+
+      // Matching philosophers
+      const philList = document.getElementById('philosopher-list');
+      philList.innerHTML = '';
+      const matchedPhils = philosophers.filter(p => {
+        const score = p.school === 'utilitarian' ? pcts.util :
+                      p.school === 'deontological' ? pcts.deont :
+                      p.school === 'virtueEthics' ? pcts.virtue :
+                      p.school === 'careEthics' ? pcts.care :
+                      p.school === 'contractarian' ? pcts.contract : pcts.rights;
+        return score >= p.threshold;
+      });
+
+      matchedPhils.slice(0, 5).forEach(p => {
+        const tag = document.createElement('div');
+        tag.className = 'philosopher-tag';
+        tag.textContent = p.name;
+        tag.title = p.desc;
+        philList.appendChild(tag);
+      });
+
+      if (matchedPhils.length === 0) {
+        const tag = document.createElement('div');
+        tag.className = 'philosopher-tag';
+        tag.textContent = 'Unique Perspective';
+        philList.appendChild(tag);
+      }
+
+      // Choice history
+      const historyList = document.getElementById('history-list');
+      historyList.innerHTML = '';
+      choices.forEach((c, i) => {
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        if (c.isInconsistent) {
+          div.style.borderLeftColor = '#e74c3c';
         }
 
-        function loadScenario() {
-            const scenario = scenarios[currentScenario];
-
-            document.getElementById('scenario-num').textContent = currentScenario + 1;
-            document.getElementById('saved-count').textContent = savedCount;
-            document.getElementById('scenario-title').textContent = scenario.title;
-            document.getElementById('dialogue-text').textContent = scenario.description;
-            document.getElementById('choice-a').textContent = scenario.choiceA.text;
-            document.getElementById('choice-b').textContent = scenario.choiceB.text;
-
-            drawScene(scenario.scene);
-        }
-
-        function drawScene(sceneType) {
-            const canvas = document.getElementById('scene');
-            const ctx = canvas.getContext('2d');
-
-            // Set canvas size
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight;
-
-            // Clear canvas
-            ctx.fillStyle = '#0f3460';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Draw based on scene type
-            switch(sceneType) {
-                case 'classic':
-                    drawClassicScene(ctx, canvas);
-                    break;
-                case 'bridge':
-                    drawBridgeScene(ctx, canvas);
-                    break;
-                case 'loop':
-                    drawLoopScene(ctx, canvas);
-                    break;
-                case 'hospital':
-                    drawHospitalScene(ctx, canvas);
-                    break;
-                case 'sacrifice':
-                    drawSacrificeScene(ctx, canvas);
-                    break;
-            }
-        }
-
-        function drawClassicScene(ctx, canvas) {
-            const w = canvas.width;
-            const h = canvas.height;
-
-            // Ground
-            ctx.fillStyle = '#2d4a22';
-            ctx.fillRect(0, h - 40, w, 40);
-
-            // Main track
-            ctx.strokeStyle = '#4a4a4a';
-            ctx.lineWidth = 8;
-            ctx.beginPath();
-            ctx.moveTo(0, h - 60);
-            ctx.lineTo(w * 0.4, h - 60);
-            ctx.lineTo(w, h - 60);
-            ctx.stroke();
-
-            // Side track
-            ctx.beginPath();
-            ctx.moveTo(w * 0.4, h - 60);
-            ctx.lineTo(w * 0.5, h - 90);
-            ctx.lineTo(w, h - 90);
-            ctx.stroke();
-
-            // Track details
-            ctx.strokeStyle = '#3a3a3a';
-            ctx.lineWidth = 2;
-            for (let i = 0; i < w; i += 20) {
-                ctx.beginPath();
-                ctx.moveTo(i, h - 56);
-                ctx.lineTo(i, h - 64);
-                ctx.stroke();
-            }
-
-            // Trolley
-            drawTrolley(ctx, 30, h - 85);
-
-            // Five people on main track
-            for (let i = 0; i < 5; i++) {
-                drawPerson(ctx, w * 0.6 + i * 25, h - 80, '#ffcc00');
-            }
-
-            // One person on side track
-            drawPerson(ctx, w * 0.7, h - 110, '#ffcc00');
-
-            // Lever
-            drawLever(ctx, w * 0.35, h - 100);
-        }
-
-        function drawBridgeScene(ctx, canvas) {
-            const w = canvas.width;
-            const h = canvas.height;
-
-            // Sky gradient
-            const gradient = ctx.createLinearGradient(0, 0, 0, h);
-            gradient.addColorStop(0, '#1a1a2e');
-            gradient.addColorStop(1, '#0f3460');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, w, h);
-
-            // Track below
-            ctx.strokeStyle = '#4a4a4a';
-            ctx.lineWidth = 8;
-            ctx.beginPath();
-            ctx.moveTo(0, h - 30);
-            ctx.lineTo(w, h - 30);
-            ctx.stroke();
-
-            // Bridge
-            ctx.fillStyle = '#533483';
-            ctx.fillRect(w * 0.3, h - 120, w * 0.4, 20);
-
-            // Bridge supports
-            ctx.fillStyle = '#3d2660';
-            ctx.fillRect(w * 0.32, h - 100, 10, 70);
-            ctx.fillRect(w * 0.58, h - 100, 10, 70);
-
-            // Trolley
-            drawTrolley(ctx, 20, h - 55);
-
-            // Five people on track
-            for (let i = 0; i < 5; i++) {
-                drawPerson(ctx, w * 0.6 + i * 20, h - 50, '#ffcc00');
-            }
-
-            // Fat man on bridge
-            drawPerson(ctx, w * 0.45, h - 140, '#ff9966', 1.5);
-
-            // You on bridge
-            drawPerson(ctx, w * 0.38, h - 140, '#66ffcc');
-        }
-
-        function drawLoopScene(ctx, canvas) {
-            const w = canvas.width;
-            const h = canvas.height;
-
-            // Ground
-            ctx.fillStyle = '#2d4a22';
-            ctx.fillRect(0, h - 40, w, 40);
-
-            // Main track
-            ctx.strokeStyle = '#4a4a4a';
-            ctx.lineWidth = 8;
-            ctx.beginPath();
-            ctx.moveTo(0, h - 70);
-            ctx.lineTo(w * 0.3, h - 70);
-            ctx.lineTo(w, h - 70);
-            ctx.stroke();
-
-            // Loop track
-            ctx.beginPath();
-            ctx.moveTo(w * 0.3, h - 70);
-            ctx.lineTo(w * 0.4, h - 110);
-            ctx.lineTo(w * 0.7, h - 110);
-            ctx.lineTo(w * 0.8, h - 70);
-            ctx.stroke();
-
-            // Trolley
-            drawTrolley(ctx, 30, h - 95);
-
-            // Five people on main track
-            for (let i = 0; i < 5; i++) {
-                drawPerson(ctx, w * 0.5 + i * 20, h - 90, '#ffcc00');
-            }
-
-            // One person on loop
-            drawPerson(ctx, w * 0.5, h - 130, '#ffcc00');
-
-            // Lever
-            drawLever(ctx, w * 0.25, h - 110);
-        }
-
-        function drawHospitalScene(ctx, canvas) {
-            const w = canvas.width;
-            const h = canvas.height;
-
-            // Hospital interior
-            ctx.fillStyle = '#f0f0f0';
-            ctx.fillRect(0, 0, w, h);
-
-            // Floor
-            ctx.fillStyle = '#ddd';
-            ctx.fillRect(0, h - 50, w, 50);
-
-            // Tile pattern
-            ctx.strokeStyle = '#ccc';
-            ctx.lineWidth = 1;
-            for (let i = 0; i < w; i += 30) {
-                ctx.beginPath();
-                ctx.moveTo(i, h - 50);
-                ctx.lineTo(i, h);
-                ctx.stroke();
-            }
-
-            // Hospital beds with patients
-            for (let i = 0; i < 5; i++) {
-                // Bed
-                ctx.fillStyle = '#fff';
-                ctx.fillRect(20 + i * 55, h - 100, 45, 40);
-                ctx.strokeStyle = '#999';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(20 + i * 55, h - 100, 45, 40);
-
-                // Patient (red - sick)
-                drawPerson(ctx, 35 + i * 55, h - 110, '#ff6666', 0.8);
-            }
-
-            // Healthy visitor
-            drawPerson(ctx, w - 50, h - 70, '#66ff66');
-
-            // Doctor (you)
-            drawPerson(ctx, w - 90, h - 70, '#66ffcc');
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(w - 95, h - 80, 15, 5);
-        }
-
-        function drawSacrificeScene(ctx, canvas) {
-            const w = canvas.width;
-            const h = canvas.height;
-
-            // Ground
-            ctx.fillStyle = '#2d4a22';
-            ctx.fillRect(0, h - 40, w, 40);
-
-            // Track
-            ctx.strokeStyle = '#4a4a4a';
-            ctx.lineWidth = 8;
-            ctx.beginPath();
-            ctx.moveTo(0, h - 60);
-            ctx.lineTo(w, h - 60);
-            ctx.stroke();
-
-            // Trolley
-            drawTrolley(ctx, 30, h - 85);
-
-            // You on track
-            drawPerson(ctx, w * 0.4, h - 80, '#66ffcc');
-
-            // Five people ahead
-            for (let i = 0; i < 5; i++) {
-                drawPerson(ctx, w * 0.6 + i * 25, h - 80, '#ffcc00');
-            }
-
-            // Dramatic spotlight
-            ctx.fillStyle = 'rgba(255, 255, 200, 0.1)';
-            ctx.beginPath();
-            ctx.arc(w * 0.4, h - 80, 40, 0, Math.PI * 2);
-            ctx.fill();
-        }
-
-        function drawTrolley(ctx, x, y) {
-            // Trolley body
-            ctx.fillStyle = '#e94560';
-            ctx.fillRect(x, y, 50, 25);
-
-            // Trolley details
-            ctx.fillStyle = '#ff6b6b';
-            ctx.fillRect(x + 5, y + 3, 15, 10);
-            ctx.fillRect(x + 25, y + 3, 15, 10);
-
-            // Wheels
-            ctx.fillStyle = '#333';
-            ctx.beginPath();
-            ctx.arc(x + 12, y + 25, 6, 0, Math.PI * 2);
-            ctx.arc(x + 38, y + 25, 6, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Motion lines
-            ctx.strokeStyle = '#ffcc00';
-            ctx.lineWidth = 2;
-            for (let i = 0; i < 3; i++) {
-                ctx.beginPath();
-                ctx.moveTo(x - 10 - i * 8, y + 5 + i * 7);
-                ctx.lineTo(x - 20 - i * 8, y + 5 + i * 7);
-                ctx.stroke();
-            }
-        }
-
-        function drawPerson(ctx, x, y, color, scale = 1) {
-            const s = scale;
-
-            // Head
-            ctx.fillStyle = '#ffdbac';
-            ctx.beginPath();
-            ctx.arc(x, y, 6 * s, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Body
-            ctx.fillStyle = color;
-            ctx.fillRect(x - 5 * s, y + 6 * s, 10 * s, 15 * s);
-
-            // Arms
-            ctx.fillRect(x - 10 * s, y + 8 * s, 5 * s, 10 * s);
-            ctx.fillRect(x + 5 * s, y + 8 * s, 5 * s, 10 * s);
-        }
-
-        function drawLever(ctx, x, y) {
-            // Base
-            ctx.fillStyle = '#666';
-            ctx.fillRect(x - 5, y + 15, 15, 10);
-
-            // Lever arm
-            ctx.strokeStyle = '#888';
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.moveTo(x + 2, y + 20);
-            ctx.lineTo(x - 5, y);
-            ctx.stroke();
-
-            // Handle
-            ctx.fillStyle = '#e94560';
-            ctx.beginPath();
-            ctx.arc(x - 5, y, 6, 0, Math.PI * 2);
-            ctx.fill();
-        }
-
-        function makeChoice(choice) {
-            playSound('confirm');
-            const scenario = scenarios[currentScenario];
-            const result = choice === 'A' ? scenario.choiceA : scenario.choiceB;
-
-            choices.push(choice);
-            savedCount += result.saved;
-            if (result.active) activeChoices++;
-
-            // Show result
-            document.getElementById('game-play').classList.add('hidden');
-            document.getElementById('result-screen').classList.remove('hidden');
-
-            document.getElementById('result-title').textContent =
-                choice === 'A' ? '🚫 INACTION' : '⚡ ACTION';
-            document.getElementById('result-text').textContent = result.result;
-            document.getElementById('philosophy-text').textContent = scenario.philosophy;
-        }
-
-        function nextScenario() {
-            playSound('select');
-            currentScenario++;
-
-            if (currentScenario >= scenarios.length) {
-                showSummary();
-            } else {
-                document.getElementById('result-screen').classList.add('hidden');
-                document.getElementById('game-play').classList.remove('hidden');
-                loadScenario();
-            }
-        }
-
-        function showSummary() {
-            document.getElementById('result-screen').classList.add('hidden');
-            document.getElementById('summary-screen').classList.remove('hidden');
-
-            document.getElementById('final-saved').textContent = savedCount + ' lives';
-            document.getElementById('active-choices').textContent = activeChoices + ' / 5';
-
-            // Determine philosophy
-            let philType, philSummary;
-
-            if (activeChoices >= 4) {
-                philType = 'UTILITARIAN';
-                philSummary = 'You consistently chose to maximize good outcomes, even when it required difficult actions. You believe the ends can justify the means, and that we have a moral duty to minimize suffering.';
-            } else if (activeChoices <= 1) {
-                philType = 'DEONTOLOGIST';
-                philSummary = 'You prioritized moral rules over outcomes. Killing is wrong, regardless of consequences. You believe some actions are inherently immoral, and we cannot use people as mere means to an end.';
-            } else if (activeChoices === 2 || activeChoices === 3) {
-                philType = 'MORAL PLURALIST';
-                philSummary = 'Your choices varied based on context. You recognize that both rules and consequences matter, and that different situations call for different ethical frameworks. This reflects how most humans actually make moral decisions.';
-            }
-
-            document.getElementById('philosophy-type').textContent = philType;
-            document.getElementById('philosophy-summary').textContent = philSummary;
-        }
-
-        function restartGame() {
-            playSound('confirm');
-            document.getElementById('summary-screen').classList.add('hidden');
-            document.getElementById('title-screen').classList.remove('hidden');
-        }
-
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            if (!document.getElementById('game-play').classList.contains('hidden')) {
-                drawScene(scenarios[currentScenario].scene);
-            }
+        const scoreNames = {
+          utilitarian: 'Util', deontological: 'Deont', virtueEthics: 'Virtue',
+          careEthics: 'Care', contractarian: 'Contract', naturalRights: 'Rights',
+          activeHarm: 'Active', impartiality: 'Impartial', consequentialism: 'Conseq', flexibility: 'Flex'
+        };
+
+        let scoresHtml = '';
+        Object.entries(c.scores).forEach(([key, val]) => {
+          if (val !== 0) {
+            scoresHtml += `<span class="score-tag ${val > 0 ? 'positive' : 'negative'}">${scoreNames[key]}: ${val > 0 ? '+' : ''}${val}</span>`;
+          }
         });
-    </script>
+
+        div.innerHTML = `
+          <span class="history-num">${i + 1}</span>
+          <div class="history-content">
+            <div class="history-title">${c.title} ${c.isInconsistent ? '⚠️' : ''}</div>
+            <div class="history-choice">${c.choice === 'A' ? 'A' : 'B'}: ${c.choiceText}</div>
+            <div class="history-scores">${scoresHtml}</div>
+          </div>
+        `;
+        historyList.appendChild(div);
+      });
+
+      // Consistency
+      const consistency = Math.max(0, 100 - (inconsistencies * 15));
+      document.getElementById('final-consistency').textContent = consistency;
+
+      const consistencyEl = document.querySelector('.consistency-number');
+      if (consistency >= 85) {
+        consistencyEl.style.color = '#2ecc71';
+      } else if (consistency >= 60) {
+        consistencyEl.style.color = '#f39c12';
+      } else {
+        consistencyEl.style.color = '#e74c3c';
+      }
+
+      let consistencyText = '';
+      if (consistency >= 85) {
+        consistencyText = 'Your choices show remarkable internal consistency. You apply your moral principles uniformly across different scenarios, suggesting a well-developed ethical framework.';
+      } else if (consistency >= 60) {
+        consistencyText = 'Your choices show moderate consistency. Like most people, you sometimes apply different principles in similar situations, revealing the complexity of real moral reasoning.';
+      } else {
+        consistencyText = 'Your choices varied significantly across scenarios. This may reflect moral pluralism (different situations call for different approaches) or intuitions that resist systematic theory.';
+      }
+      document.getElementById('consistency-explanation').textContent = consistencyText;
+
+      // Save result to localStorage
+      saveResult();
+
+      // Announce results for screen readers
+      announce(`Your philosophical profile is ready. Primary philosophy: ${primary.name}. Consistency score: ${consistency}%. Press S to share your results or Enter to play again.`);
+    }
+
+    function saveResult() {
+      const result = {
+        date: new Date().toISOString(),
+        mode: gameMode,
+        scores: { ...scores },
+        choices: [...choices],
+        consistency: Math.max(0, 100 - (inconsistencies * 15))
+      };
+      localStorage.setItem(STORAGE_KEYS.LAST_RESULT, JSON.stringify(result));
+
+      // Add to history
+      let history = [];
+      try {
+        history = JSON.parse(localStorage.getItem(STORAGE_KEYS.HISTORY) || '[]');
+      } catch (e) {}
+      history.unshift(result);
+      if (history.length > 10) history = history.slice(0, 10);
+      localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(history));
+    }
+
+    function restartGame() {
+      playSound('confirm');
+      hideAllScreens();
+      document.getElementById('title-screen').classList.remove('hidden');
+    }
+
+    // ===== SHARE FUNCTIONS =====
+    function getResultsText() {
+      const maxScore = activeScenarios.length * 3;
+      const pcts = {
+        util: Math.min(100, Math.max(0, Math.round((scores.utilitarian / maxScore) * 100 + 50))),
+        deont: Math.min(100, Math.max(0, Math.round((scores.deontological / maxScore) * 100 + 50))),
+        virtue: Math.min(100, Math.max(0, Math.round((scores.virtueEthics / maxScore) * 100 + 50))),
+        care: Math.min(100, Math.max(0, Math.round((scores.careEthics / maxScore) * 100 + 50))),
+        contract: Math.min(100, Math.max(0, Math.round((scores.contractarian / maxScore) * 100 + 50))),
+        rights: Math.min(100, Math.max(0, Math.round((scores.naturalRights / maxScore) * 100 + 50)))
+      };
+
+      const philScores = [
+        { name: 'Utilitarian', score: scores.utilitarian },
+        { name: 'Deontologist', score: scores.deontological },
+        { name: 'Virtue Ethicist', score: scores.virtueEthics },
+        { name: 'Care Ethicist', score: scores.careEthics },
+        { name: 'Contractarian', score: scores.contractarian },
+        { name: 'Rights Theorist', score: scores.naturalRights }
+      ];
+      philScores.sort((a, b) => b.score - a.score);
+      const primary = philScores[0].name;
+
+      const consistency = Math.max(0, 100 - (inconsistencies * 15));
+
+      let text = `🚃 THE TROLLEY PROBLEM - My Results\n\n`;
+      text += `Primary Philosophy: ${primary.toUpperCase()}\n`;
+      text += `Consistency Score: ${consistency}%\n\n`;
+      text += `Philosophy Breakdown:\n`;
+      text += `• Utilitarianism: ${pcts.util}%\n`;
+      text += `• Deontology: ${pcts.deont}%\n`;
+      text += `• Virtue Ethics: ${pcts.virtue}%\n`;
+      text += `• Care Ethics: ${pcts.care}%\n`;
+      text += `• Contractarianism: ${pcts.contract}%\n`;
+      text += `• Natural Rights: ${pcts.rights}%\n\n`;
+      text += `Completed ${activeScenarios.length} moral dilemmas in ${gameMode === 'quick' ? 'Quick Play' : 'Full Examination'} mode.`;
+
+      return text;
+    }
+
+    function shareResults() {
+      playSound('select');
+      const modal = document.getElementById('share-modal');
+      const preview = document.getElementById('share-preview');
+      preview.textContent = getResultsText();
+      modal.classList.remove('hidden');
+    }
+
+    function closeShareModal() {
+      playSound('select');
+      document.getElementById('share-modal').classList.add('hidden');
+    }
+
+    function copyResultsText() {
+      const text = getResultsText();
+      navigator.clipboard.writeText(text).then(() => {
+        playSound('confirm');
+        const btn = event.target;
+        const originalText = btn.textContent;
+        btn.textContent = '✓ Copied!';
+        btn.classList.add('copy-success');
+        setTimeout(() => {
+          btn.textContent = originalText;
+          btn.classList.remove('copy-success');
+        }, 2000);
+      }).catch(() => {
+        alert('Could not copy to clipboard. Please select and copy the text manually.');
+      });
+    }
+
+    function shareToTwitter() {
+      playSound('confirm');
+      const maxScore = activeScenarios.length * 3;
+      const philScores = [
+        { name: 'Utilitarian', score: scores.utilitarian },
+        { name: 'Deontologist', score: scores.deontological },
+        { name: 'Virtue Ethicist', score: scores.virtueEthics },
+        { name: 'Care Ethicist', score: scores.careEthics },
+        { name: 'Contractarian', score: scores.contractarian },
+        { name: 'Rights Theorist', score: scores.naturalRights }
+      ];
+      philScores.sort((a, b) => b.score - a.score);
+      const primary = philScores[0].name;
+      const consistency = Math.max(0, 100 - (inconsistencies * 15));
+
+      const text = `🚃 I took The Trolley Problem ethics test!\n\nPrimary Philosophy: ${primary}\nConsistency: ${consistency}%\n\nDiscover your moral framework:`;
+
+      const url = encodeURIComponent(window.location.href);
+      const tweetText = encodeURIComponent(text);
+      window.open(`https://twitter.com/intent/tweet?text=${tweetText}&url=${url}`, '_blank');
+    }
+
+    function downloadImage() {
+      playSound('confirm');
+
+      // Create a canvas to render the results
+      const canvas = document.createElement('canvas');
+      canvas.width = 600;
+      canvas.height = 800;
+      const ctx = canvas.getContext('2d');
+
+      // Background
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      gradient.addColorStop(0, '#1a1a2e');
+      gradient.addColorStop(1, '#16213e');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Border
+      ctx.strokeStyle = '#e94560';
+      ctx.lineWidth = 8;
+      ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
+
+      // Title
+      ctx.fillStyle = '#e94560';
+      ctx.font = 'bold 28px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('🚃 THE TROLLEY PROBLEM', canvas.width / 2, 80);
+
+      ctx.fillStyle = '#8be9fd';
+      ctx.font = '16px Arial';
+      ctx.fillText('Philosophical Profile', canvas.width / 2, 110);
+
+      // Calculate scores
+      const maxScore = activeScenarios.length * 3;
+      const pcts = {
+        util: Math.min(100, Math.max(0, Math.round((scores.utilitarian / maxScore) * 100 + 50))),
+        deont: Math.min(100, Math.max(0, Math.round((scores.deontological / maxScore) * 100 + 50))),
+        virtue: Math.min(100, Math.max(0, Math.round((scores.virtueEthics / maxScore) * 100 + 50))),
+        care: Math.min(100, Math.max(0, Math.round((scores.careEthics / maxScore) * 100 + 50))),
+        contract: Math.min(100, Math.max(0, Math.round((scores.contractarian / maxScore) * 100 + 50))),
+        rights: Math.min(100, Math.max(0, Math.round((scores.naturalRights / maxScore) * 100 + 50)))
+      };
+
+      const philScores = [
+        { name: 'Utilitarian', score: scores.utilitarian },
+        { name: 'Deontologist', score: scores.deontological },
+        { name: 'Virtue Ethicist', score: scores.virtueEthics },
+        { name: 'Care Ethicist', score: scores.careEthics },
+        { name: 'Contractarian', score: scores.contractarian },
+        { name: 'Rights Theorist', score: scores.naturalRights }
+      ];
+      philScores.sort((a, b) => b.score - a.score);
+      const primary = philScores[0].name;
+
+      // Primary philosophy box
+      ctx.fillStyle = '#533483';
+      ctx.fillRect(50, 140, canvas.width - 100, 80);
+      ctx.strokeStyle = '#e94560';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(50, 140, canvas.width - 100, 80);
+
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 24px Arial';
+      ctx.fillText(primary.toUpperCase(), canvas.width / 2, 185);
+
+      // Philosophy bars
+      const barData = [
+        { name: 'Utilitarianism', pct: pcts.util },
+        { name: 'Deontology', pct: pcts.deont },
+        { name: 'Virtue Ethics', pct: pcts.virtue },
+        { name: 'Care Ethics', pct: pcts.care },
+        { name: 'Contractarianism', pct: pcts.contract },
+        { name: 'Natural Rights', pct: pcts.rights }
+      ];
+
+      let y = 260;
+      ctx.textAlign = 'left';
+      barData.forEach(bar => {
+        ctx.fillStyle = '#8be9fd';
+        ctx.font = '14px Arial';
+        ctx.fillText(bar.name, 60, y);
+
+        // Bar background
+        ctx.fillStyle = '#1a1a2e';
+        ctx.fillRect(200, y - 12, 300, 18);
+
+        // Bar fill
+        const barGradient = ctx.createLinearGradient(200, 0, 500, 0);
+        barGradient.addColorStop(0, '#e94560');
+        barGradient.addColorStop(1, '#8be9fd');
+        ctx.fillStyle = barGradient;
+        ctx.fillRect(200, y - 12, bar.pct * 3, 18);
+
+        // Percentage
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'right';
+        ctx.fillText(bar.pct + '%', 560, y);
+        ctx.textAlign = 'left';
+
+        y += 40;
+      });
+
+      // Consistency score
+      const consistency = Math.max(0, 100 - (inconsistencies * 15));
+      y += 30;
+      ctx.fillStyle = '#8be9fd';
+      ctx.font = '16px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('CONSISTENCY SCORE', canvas.width / 2, y);
+
+      ctx.fillStyle = consistency >= 85 ? '#2ecc71' : (consistency >= 60 ? '#f39c12' : '#e74c3c');
+      ctx.font = 'bold 48px Arial';
+      ctx.fillText(consistency + '%', canvas.width / 2, y + 55);
+
+      // Footer
+      ctx.fillStyle = '#666';
+      ctx.font = '12px Arial';
+      ctx.fillText(`${activeScenarios.length} dilemmas • ${gameMode === 'quick' ? 'Quick Play' : 'Full Examination'}`, canvas.width / 2, canvas.height - 50);
+
+      // Download
+      const link = document.createElement('a');
+      link.download = 'trolley-problem-results.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    // Close modal on escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !document.getElementById('share-modal').classList.contains('hidden')) {
+        closeShareModal();
+      }
+    });
+
+    // ===== SCENE DRAWING =====
+    function drawScene(sceneType) {
+      const canvas = document.getElementById('scene');
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+      drawSceneAnimated(ctx, canvas, sceneType, 0, '');
+    }
+
+    function drawSceneAnimated(ctx, canvas, sceneType, frame, choice) {
+      const w = canvas.width, h = canvas.height;
+
+      // Background
+      ctx.fillStyle = '#0f3460';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#2d4a22';
+      ctx.fillRect(0, h - 35, w, 35);
+
+      // Scene-specific drawing
+      if (sceneType === 'hospital' || sceneType === 'promise' || sceneType === 'door' || sceneType === 'interrogation' || sceneType === 'omelas') {
+        drawIndoorScene(ctx, w, h, sceneType, frame, choice);
+      } else {
+        drawOutdoorScene(ctx, w, h, sceneType, frame, choice);
+      }
+    }
+
+    function drawOutdoorScene(ctx, w, h, sceneType, frame, choice) {
+      // Tracks
+      ctx.strokeStyle = '#4a4a4a';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(0, h - 50);
+      ctx.lineTo(w, h - 50);
+      ctx.stroke();
+
+      if (sceneType !== 'sacrifice') {
+        ctx.beginPath();
+        ctx.moveTo(w * 0.35, h - 50);
+        ctx.lineTo(w * 0.45, h - 80);
+        ctx.lineTo(w, h - 80);
+        ctx.stroke();
+      }
+
+      // Trolley position
+      let trolleyY = h - 70;
+      if (frame > 0) {
+        trolleyX = 20 + (frame / 65) * (w * 0.4);
+        if (frame > 65) {
+          const postFrame = frame - 65;
+          if (choice === 'B' && sceneType !== 'sacrifice') {
+            trolleyX = w * 0.4 + postFrame * 2;
+            trolleyY = h - 70 - postFrame * 0.6;
+          } else {
+            trolleyX = w * 0.4 + postFrame * 2;
+          }
+        }
+      }
+
+      // Draw people based on scene
+      const hitFrame = 70;
+
+      if (sceneType === 'classic' || sceneType === 'bridge' || sceneType === 'agedecision' || sceneType === 'justice') {
+        const count = sceneType === 'agedecision' ? 3 : (sceneType === 'justice' ? 2 : 5);
+        for (let i = 0; i < count; i++) {
+          const px = w * 0.55 + i * 20, py = h - 65;
+          if (choice === 'A' && frame > hitFrame) { drawX(ctx, px, py); }
+          else { drawPerson(ctx, px, py, sceneType === 'agedecision' ? '#aaa' : '#ffcc00'); }
+        }
+        const sideColor = sceneType === 'agedecision' ? '#ffcc00' : (sceneType === 'justice' ? '#ff6666' : '#ffcc00');
+        const sidePx = w * 0.65, sidePy = h - 95;
+        if (choice === 'B' && frame > hitFrame) { drawX(ctx, sidePx, sidePy); }
+        else { drawPerson(ctx, sidePx, sidePy, sideColor, sceneType === 'agedecision' ? 0.7 : 1); }
+      }
+
+      if (sceneType === 'family' || sceneType === 'final') {
+        const gmPx = w * 0.65, gmPy = h - 95;
+        if (choice === 'A' && frame > hitFrame) { drawX(ctx, w * 0.55 + 40, h - 65); }
+        else { for (let i = 0; i < 5; i++) drawPerson(ctx, w * 0.55 + i * 18, h - 65, '#ffcc00'); }
+
+        if (choice === 'B' && frame > hitFrame) { drawX(ctx, gmPx, gmPy); }
+        else {
+          drawPerson(ctx, gmPx, gmPy, '#ff99cc');
+          ctx.fillStyle = '#fff';
+          ctx.beginPath();
+          ctx.arc(gmPx, gmPy - 8, 4, 0, Math.PI, true);
+          ctx.fill();
+        }
+      }
+
+      if (sceneType === 'sacrifice') {
+        drawPerson(ctx, w * 0.4, h - 65, '#66ffcc');
+        for (let i = 0; i < 5; i++) {
+          if (choice === 'A' && frame > hitFrame) { drawX(ctx, w * 0.55 + i * 18, h - 65); }
+          else { drawPerson(ctx, w * 0.55 + i * 18, h - 65, '#ffcc00'); }
+        }
+        if (choice === 'B' && frame > hitFrame) {
+          drawX(ctx, w * 0.4, h - 65);
+          ctx.strokeStyle = '#f1fa8c';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(w * 0.4, h - 80, 10, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      }
+
+      if (sceneType === 'bridge') {
+        ctx.fillStyle = '#533483';
+        ctx.fillRect(w * 0.25, h - 110, w * 0.35, 15);
+        ctx.fillStyle = '#3d2660';
+        ctx.fillRect(w * 0.27, h - 95, 8, 60);
+        ctx.fillRect(w * 0.52, h - 95, 8, 60);
+
+        let fatManY = h - 125;
+        if (choice === 'B' && frame > 25) {
+          fatManY = Math.min(h - 65, h - 125 + (frame - 25) * 2);
+          if (frame > hitFrame) { drawX(ctx, w * 0.4, h - 65); }
+          else if (fatManY < h - 65) { drawPerson(ctx, w * 0.4, fatManY, '#ff9966', 1.4); }
+        } else {
+          drawPerson(ctx, w * 0.4, fatManY, '#ff9966', 1.4);
+        }
+        drawPerson(ctx, w * 0.32, h - 125, '#66ffcc', 0.9);
+      }
+
+      // Draw trolley
+      drawTrolley(ctx, trolleyX, trolleyY, frame);
+    }
+
+    function drawIndoorScene(ctx, w, h, sceneType, frame, choice) {
+      ctx.fillStyle = '#e8e8e8';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#ccc';
+      ctx.fillRect(0, h - 40, w, 40);
+
+      const hitFrame = 70;
+
+      if (sceneType === 'hospital') {
+        ctx.fillStyle = '#fff';
+        for (let i = 0; i < 5; i++) {
+          ctx.fillRect(w * 0.15 + i * 45, h - 100, 35, 60);
+        }
+        ctx.fillStyle = '#e94560';
+        ctx.font = '20px Arial';
+        ctx.fillText('🏥', w * 0.05, 30);
+
+        for (let i = 0; i < 5; i++) {
+          const px = w * 0.15 + i * 45 + 17;
+          if (choice === 'A' && frame > hitFrame) {
+            drawX(ctx, px, h - 70, '#333');
+          } else {
+            drawPerson(ctx, px, h - 70, '#ffcc00', 0.8);
+          }
+        }
+
+        const visitorX = w * 0.85;
+        if (choice === 'B' && frame > hitFrame) {
+          drawX(ctx, visitorX, h - 70, '#333');
+        } else {
+          drawPerson(ctx, visitorX, h - 70, '#66ff66', 1);
+        }
+      }
+
+      if (sceneType === 'interrogation') {
+        ctx.fillStyle = '#1a1a2e';
+        ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = '#333';
+        ctx.fillRect(w * 0.3, h - 80, 100, 50);
+
+        ctx.font = '24px Arial';
+        ctx.fillText('💡', w * 0.5 - 12, 40);
+
+        drawPerson(ctx, w * 0.5, h - 60, '#ff6666', 1);
+
+        if (choice === 'B' && frame > 30) {
+          ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+          ctx.beginPath();
+          ctx.arc(w * 0.5, h - 60, 20 + (frame - 30) * 0.3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      if (sceneType === 'promise') {
+        ctx.fillStyle = '#2d4a22';
+        ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = '#8B4513';
+        ctx.fillRect(w * 0.35, h - 90, 80, 60);
+
+        ctx.font = '24px Arial';
+        ctx.fillText('💰', w * 0.5 - 12, h - 50);
+
+        if (choice === 'B') {
+          ctx.fillText('🌍', w * 0.2, h - 50);
+        }
+      }
+
+      if (sceneType === 'door') {
+        ctx.fillStyle = '#8B4513';
+        ctx.fillRect(w * 0.4, h - 130, 60, 100);
+        ctx.fillStyle = '#FFD700';
+        ctx.beginPath();
+        ctx.arc(w * 0.42 + 50, h - 80, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (frame < 30 || choice === 'A') {
+          ctx.font = '24px Arial';
+          ctx.fillText('🔪', w * 0.2, h - 80);
+        }
+
+        const friendX = w * 0.7;
+        if (choice === 'A' && frame > hitFrame) {
+          drawX(ctx, friendX, h - 70, '#333');
+        } else {
+          drawPerson(ctx, friendX, h - 70, '#66ffcc', 1);
+        }
+      }
+
+      if (sceneType === 'omelas') {
+        ctx.fillStyle = '#1a1a2e';
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.fillStyle = '#333';
+        ctx.fillRect(w * 0.35, h - 100, 80, 70);
+
+        ctx.font = '20px Arial';
+        ctx.fillText('👶', w * 0.5 - 10, h - 55);
+
+        ctx.fillStyle = '#FFD700';
+        for (let i = 0; i < 5; i++) {
+          ctx.fillText('🏛️', w * 0.1 + i * 60, 30);
+        }
+      }
+    }
+
+    function drawTrolley(ctx, x, y, frame) {
+      ctx.fillStyle = '#e94560';
+      ctx.fillRect(x - 20, y - 15, 40, 20);
+      ctx.fillStyle = '#333';
+      ctx.beginPath();
+      ctx.arc(x - 12, y + 5, 6, 0, Math.PI * 2);
+      ctx.arc(x + 12, y + 5, 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      if (frame > 0) {
+        ctx.strokeStyle = '#ff6b8a';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x - 25, y);
+        ctx.lineTo(x - 35 - Math.random() * 5, y + Math.random() * 6 - 3);
+        ctx.stroke();
+      }
+    }
+
+    function drawPerson(ctx, x, y, color, scale = 1) {
+      const s = 8 * scale;
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(x, y - s * 1.5, s * 0.6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillRect(x - s * 0.4, y - s, s * 0.8, s * 1.2);
+    }
+
+    function drawX(ctx, x, y, color = '#ff0000') {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(x - 8, y - 15);
+      ctx.lineTo(x + 8, y + 5);
+      ctx.moveTo(x + 8, y - 15);
+      ctx.lineTo(x - 8, y + 5);
+      ctx.stroke();
+    }
+
+    // ===== KEYBOARD CONTROLS =====
+    document.addEventListener('keydown', (e) => {
+      const key = e.key.toLowerCase();
+
+      // Mute toggle
+      if (key === 'm') {
+        toggleMute();
+        return;
+      }
+
+      // Title screen
+      if (!document.getElementById('title-screen').classList.contains('hidden')) {
+        if (key === '1') startGame('quick');
+        if (key === '2') startGame('full');
+        if (key === '3') startGame('ai');
+        if (key === '4') startGame('extended');
+        return;
+      }
+
+      // Game screen
+      if (!document.getElementById('game-play').classList.contains('hidden') && !isAnimating) {
+        if (key === 'a') makeChoice('A');
+        if (key === 'b') makeChoice('B');
+        return;
+      }
+
+      // Result screen
+      if (!document.getElementById('result-screen').classList.contains('hidden')) {
+        if (key === 'enter' || key === ' ') {
+          e.preventDefault();
+          nextScenario();
+        }
+        return;
+      }
+
+      // Summary screen
+      if (!document.getElementById('summary-screen').classList.contains('hidden')) {
+        if (key === 'enter') restartGame();
+        if (key === 's') shareResults();
+        return;
+      }
+    });
+
+    // ===== WINDOW RESIZE =====
+    window.addEventListener('resize', () => {
+      if (!document.getElementById('game-play').classList.contains('hidden') && !isAnimating) {
+        drawScene(activeScenarios[currentScenario].scene);
+      }
+    });
+
+    // ===== INITIALIZATION =====
+    document.addEventListener('DOMContentLoaded', () => {
+      loadPreferences();
+
+      // Click anywhere to init audio context (needed for some browsers)
+      document.body.addEventListener('click', () => {
+        if (!audioCtx) initAudio();
+      }, { once: true });
+    });
+  </script>
 </body>
 </html>
