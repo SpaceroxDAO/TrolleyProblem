@@ -6,12 +6,19 @@
       <div class="title-trolley">🚃</div>
       <h1>THE TROLLEY PROBLEM</h1>
       <p class="subtitle">A Comprehensive Exploration of Moral Philosophy</p>
-      <p class="info">12 moral dilemmas testing your ethical consistency.<br>Your choices reveal your philosophical alignment.</p>
+      <p class="info">Branching dilemmas that test your ethical consistency.<br>Your choices reveal your philosophical alignment.</p>
       <div class="philosophy-preview">
         <span>Utilitarianism</span>
         <span>Deontology</span>
         <span>Virtue Ethics</span>
         <span>Care Ethics</span>
+        <span>Existentialism</span>
+        <span>Pragmatism</span>
+      </div>
+      <div class="feature-badges">
+        <span class="feature-badge">🔀 Branching Paths</span>
+        <span class="feature-badge">📚 Learn More Links</span>
+        <span class="feature-badge">⚡ Breaking Points</span>
       </div>
       <button class="start-btn" onclick="startGame()">
         <span class="btn-text">BEGIN EXAMINATION</span>
@@ -22,10 +29,11 @@
     <!-- Game Screen -->
     <div id="game-play" class="hidden">
       <div id="stats">
-        <span class="stat"><span class="label">DILEMMA</span> <span id="scenario-num">1</span>/12</span>
+        <span class="stat"><span class="label">DILEMMA</span> <span id="scenario-num">1</span></span>
         <span class="stat"><span class="label">CONSISTENCY</span> <span id="consistency-score">100</span>%</span>
       </div>
 
+      <div id="branch-indicator" class="hidden">🔀 BRANCHING PATH</div>
       <div id="scenario-category"></div>
       <div id="scenario-title">THE CLASSIC DILEMMA</div>
 
@@ -121,6 +129,16 @@
           <div class="phil-bar"><div class="phil-fill" id="bar-rights"></div></div>
           <span class="phil-percent" id="pct-rights">0%</span>
         </div>
+        <div class="phil-bar-item">
+          <span class="phil-name">Existentialism</span>
+          <div class="phil-bar"><div class="phil-fill" id="bar-exist"></div></div>
+          <span class="phil-percent" id="pct-exist">0%</span>
+        </div>
+        <div class="phil-bar-item">
+          <span class="phil-name">Pragmatism</span>
+          <div class="phil-bar"><div class="phil-fill" id="bar-pragma"></div></div>
+          <span class="phil-percent" id="pct-pragma">0%</span>
+        </div>
       </div>
 
       <div id="trait-analysis">
@@ -165,6 +183,12 @@
         <div class="match-header">PHILOSOPHERS YOU ALIGN WITH</div>
         <div id="philosopher-list"></div>
       </div>
+
+      <!-- Breaking Points Section -->
+      <div id="breaking-points" class="hidden"></div>
+
+      <!-- Learning Resources Section -->
+      <div id="learning-resources"></div>
 
       <div id="consistency-report">
         <div class="consistency-header">CONSISTENCY SCORE</div>
