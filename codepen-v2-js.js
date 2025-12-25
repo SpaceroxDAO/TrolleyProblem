@@ -7,6 +7,14 @@ let trolleyX = 30;
 let scenarioPath = []; // Track the branching path taken
 let breakingPoints = {}; // Track where player's principles broke
 
+// ===== GAME MODE =====
+let gameMode = 'normal'; // 'normal' or 'hard'
+const TIMER_DURATION = 20; // seconds for hard mode
+let timerInterval = null;
+let timeRemaining = TIMER_DURATION;
+let timerExpired = false;
+let timeoutChoices = 0; // Track how many times player timed out
+
 // ===== PHILOSOPHICAL SCORES =====
 let scores = {
   utilitarian: 0,
@@ -968,6 +976,76 @@ function buildInitialSequence() {
   currentScenarioId = "classic";
 }
 
+// ===== MODE SELECTION =====
+function selectMode(mode) {
+  gameMode = mode;
+  playSound('select');
+
+  // Update button states
+  document.getElementById('mode-normal').classList.toggle('active', mode === 'normal');
+  document.getElementById('mode-hard').classList.toggle('active', mode === 'hard');
+}
+
+// ===== TIMER FUNCTIONS =====
+function startTimer() {
+  if (gameMode !== 'hard') return;
+
+  clearTimer();
+  timeRemaining = TIMER_DURATION;
+  timerExpired = false;
+
+  const timerContainer = document.getElementById('timer-container');
+  const timerFill = document.getElementById('timer-fill');
+  const timerSeconds = document.getElementById('timer-seconds');
+
+  timerContainer.classList.remove('hidden', 'urgent');
+  timerFill.style.width = '100%';
+  timerSeconds.textContent = timeRemaining;
+
+  timerInterval = setInterval(() => {
+    timeRemaining--;
+
+    const percent = (timeRemaining / TIMER_DURATION) * 100;
+    timerFill.style.width = percent + '%';
+    timerSeconds.textContent = timeRemaining;
+
+    // Add urgency at 5 seconds
+    if (timeRemaining <= 5) {
+      timerContainer.classList.add('urgent');
+      playSound('warning');
+    }
+
+    // Time's up - auto-select choice A (do nothing / let trolley continue)
+    if (timeRemaining <= 0) {
+      clearTimer();
+      timerExpired = true;
+      timeoutChoices++;
+
+      // Flash the timer
+      timerSeconds.textContent = "TIME!";
+
+      // Auto-select choice A after a brief delay
+      setTimeout(() => {
+        if (!isAnimating) {
+          makeChoice('A');
+        }
+      }, 500);
+    }
+  }, 1000);
+}
+
+function clearTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+  const timerContainer = document.getElementById('timer-container');
+  if (timerContainer) {
+    timerContainer.classList.add('hidden');
+    timerContainer.classList.remove('urgent');
+  }
+}
+
 // ===== AUDIO =====
 let audioCtx;
 function initAudio() { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
@@ -994,6 +1072,8 @@ function startGame() {
   previousChoices = {};
   inconsistencies = 0;
   breakingPoints = {};
+  timeoutChoices = 0;
+  timerExpired = false;
   scores = {
     utilitarian: 0, deontological: 0, virtueEthics: 0, careEthics: 0,
     contractarian: 0, naturalRights: 0, existentialist: 0, pragmatist: 0,
@@ -1051,6 +1131,9 @@ function loadScenario() {
   document.getElementById('animation-overlay').classList.add('hidden');
 
   drawScene(scenario.scene);
+
+  // Start timer for hard mode
+  startTimer();
 }
 
 function typeText(element, text, speed = 15) {
@@ -1068,6 +1151,7 @@ function typeText(element, text, speed = 15) {
 function makeChoice(choice) {
   if (isAnimating) return;
   isAnimating = true;
+  clearTimer(); // Stop the timer when choice is made
   playSound('confirm');
 
   const scenario = scenarioTree[currentScenarioId];
@@ -1449,13 +1533,34 @@ function showResult(result, isInconsistent) {
   hideAllScreens();
   document.getElementById('result-screen').classList.remove('hidden');
 
-  document.getElementById('result-icon').textContent =
-    result.outcomeText.includes('SAVED') ? '⚡' : '🚫';
-  document.getElementById('result-title').textContent = result.outcomeText;
-  document.getElementById('result-text').textContent = result.result;
+  // Check if this was a timeout
+  const wasTimeout = timerExpired;
+  timerExpired = false; // Reset for next scenario
+
+  if (wasTimeout) {
+    document.getElementById('result-icon').textContent = '⏱️';
+    document.getElementById('result-title').textContent = 'TIME EXPIRED';
+    document.getElementById('result-text').textContent =
+      'You hesitated too long. The trolley continued on its path. ' + result.result;
+  } else {
+    document.getElementById('result-icon').textContent =
+      result.outcomeText.includes('SAVED') ? '⚡' : '🚫';
+    document.getElementById('result-title').textContent = result.outcomeText;
+    document.getElementById('result-text').textContent = result.result;
+  }
 
   const implList = document.getElementById('implications-list');
   implList.innerHTML = '';
+
+  // Add timeout implication if applicable
+  if (wasTimeout) {
+    const timeoutDiv = document.createElement('div');
+    timeoutDiv.className = 'implication-item';
+    timeoutDiv.innerHTML = `<span class="implication-icon">⏱️</span>` +
+      `<span class="implication-text implication-negative">Inaction through indecision - the trolley waits for no one</span>`;
+    implList.appendChild(timeoutDiv);
+  }
+
   result.implications.forEach(imp => {
     const div = document.createElement('div');
     div.className = 'implication-item';
@@ -1493,6 +1598,7 @@ function nextScenario() {
 // ===== FINAL SUMMARY =====
 function showSummary() {
   hideAllScreens();
+  clearTimer(); // Clear any running timer
   document.getElementById('summary-screen').classList.remove('hidden');
 
   const maxScore = choices.length * 3;
@@ -1611,6 +1717,9 @@ function showSummary() {
 
   // Show breaking points if any
   renderBreakingPoints();
+
+  // Show hard mode stats if applicable
+  renderHardModeStats();
 }
 
 function renderLearningResources(primaryKey) {
@@ -1683,6 +1792,64 @@ function renderBreakingPoints() {
 
   html += `<p class="breaking-reflection">Finding your limits isn't weakness—it reveals where abstract principles meet concrete reality.</p>`;
   container.innerHTML = html;
+}
+
+function renderHardModeStats() {
+  // Get or create hard mode container
+  let container = document.getElementById('hardmode-stats');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'hardmode-stats';
+    // Insert before consistency report
+    const consistencyReport = document.getElementById('consistency-report');
+    if (consistencyReport) {
+      consistencyReport.parentNode.insertBefore(container, consistencyReport);
+    }
+  }
+
+  if (gameMode !== 'hard') {
+    container.classList.add('hidden');
+    return;
+  }
+
+  container.classList.remove('hidden');
+  container.className = 'hardmode-stats';
+
+  const totalScenarios = choices.length;
+  const decisionsOnTime = totalScenarios - timeoutChoices;
+  const timeoutPercent = totalScenarios > 0 ? Math.round((timeoutChoices / totalScenarios) * 100) : 0;
+
+  let performanceText = '';
+  let performanceClass = '';
+
+  if (timeoutChoices === 0) {
+    performanceText = 'Perfect under pressure! You made every decision within the time limit.';
+    performanceClass = 'performance-excellent';
+  } else if (timeoutPercent <= 20) {
+    performanceText = 'Strong performance. You handled the pressure well with only a few hesitations.';
+    performanceClass = 'performance-good';
+  } else if (timeoutPercent <= 50) {
+    performanceText = 'The pressure got to you sometimes. Moral decisions under time constraints reveal our instincts.';
+    performanceClass = 'performance-ok';
+  } else {
+    performanceText = 'You froze under pressure frequently. Perhaps some decisions need more time to consider properly.';
+    performanceClass = 'performance-poor';
+  }
+
+  container.innerHTML = `
+    <div class="hardmode-header">⏱️ HARD MODE COMPLETE</div>
+    <div class="hardmode-grid">
+      <div class="hardmode-stat">
+        <span class="hardmode-number">${decisionsOnTime}</span>
+        <span class="hardmode-label">Decisions Made</span>
+      </div>
+      <div class="hardmode-stat">
+        <span class="hardmode-number">${timeoutChoices}</span>
+        <span class="hardmode-label">Timeouts</span>
+      </div>
+    </div>
+    <p class="hardmode-performance ${performanceClass}">${performanceText}</p>
+  `;
 }
 
 function restartGame() {

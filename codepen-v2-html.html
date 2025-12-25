@@ -20,6 +20,23 @@
         <span class="feature-badge">📚 Learn More Links</span>
         <span class="feature-badge">⚡ Breaking Points</span>
       </div>
+
+      <div class="mode-selector">
+        <div class="mode-label">SELECT MODE</div>
+        <div class="mode-options">
+          <button class="mode-btn active" id="mode-normal" onclick="selectMode('normal')">
+            <span class="mode-icon">🧘</span>
+            <span class="mode-name">NORMAL</span>
+            <span class="mode-desc">Take your time to decide</span>
+          </button>
+          <button class="mode-btn" id="mode-hard" onclick="selectMode('hard')">
+            <span class="mode-icon">⏱️</span>
+            <span class="mode-name">HARD MODE</span>
+            <span class="mode-desc">20 seconds or trolley continues</span>
+          </button>
+        </div>
+      </div>
+
       <button class="start-btn" onclick="startGame()">
         <span class="btn-text">BEGIN EXAMINATION</span>
         <span class="btn-icon">▶</span>
@@ -64,6 +81,14 @@
       <div id="stakes-indicator">
         <span class="stakes-label">MORAL STAKES:</span>
         <div class="stakes-bar"><div class="stakes-fill"></div></div>
+      </div>
+
+      <div id="timer-container" class="hidden">
+        <div class="timer-label">⏱️ DECIDE NOW</div>
+        <div class="timer-bar">
+          <div class="timer-fill" id="timer-fill"></div>
+        </div>
+        <div class="timer-seconds" id="timer-seconds">20</div>
       </div>
     </div>
 
